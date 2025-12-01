@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>行銷天賦測驗平台</title>
+    <!-- 載入 Tailwind CSS --><script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 自定義霓虹光暈效果 */
+        .shadow-neon-cyan {
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.4), 0 0 20px rgba(0, 255, 255, 0.2);
+        }
+        .shadow-neon-orange {
+            box-shadow: 0 0 10px rgba(255, 165, 0, 0.6), 0 0 20px rgba(255, 165, 0, 0.4);
+        }
+        /* 標題文字強調光暈 (已收斂) */
+        .title-glow {
+            text-shadow: 0 0 3px rgba(0, 255, 255, 0.3), 0 0 6px rgba(0, 255, 255, 0.1);
+        }
+
+        /* ----------------------- */
+        /* 未來科幻風格 (Futuristic/Dark Mode) */
+        /* ----------------------- */
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #130E20; /* 深紫色/深藍色背景 */
+            color: #E0E0E0; /* 淺色字體，高對比 */
+            background-attachment: fixed;
+            padding-top: 4.5rem; /* 為固定頂部 Header 騰出空間 */
+        }
+
+        /* 固定頂部 Header 樣式 (簡化置中邏輯) */
+        #main-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 50;
+            background-color: #130E20; 
+            border-bottom: 2px solid rgba(0, 255, 255, 0.1);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            padding: 0.5rem 0; /* 再次縮小 padding */
+        }
+        
+        .futuristic-card {
+            background-color: #1a1a2e; /* 深色卡片背景 */
+            border-radius: 1rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); 
+            border: 1px solid rgba(0, 255, 255, 0.1); /* 柔和青色邊框 */
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .futuristic-button {
+            background-color: #ff4500; /* 鮮豔橙色 */
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            transition: all 0.2s ease;
+            box-shadow: 0 0 8px rgba(255, 69, 0, 0.5); /* 橙色光暈 */
+            border: none;
+            cursor: pointer;
+        }
+        .futuristic-button:hover:not(:disabled) {
+            background-color: #ff6347; /* 淺一點的橙色 */
+            box-shadow: 0 0 15px rgba(255, 99, 71, 0.7);
+            transform: translateY(-1px);
+        }
+        .futuristic-button:disabled {
+            background-color: #333;
+            color: #777;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .futuristic-option {
+            background-color: #2a2a44; /* 比卡片深一點的背景 */
+            border: 2px solid #4a4a6e; /* 柔和邊框 */
+            color: #e0e0e0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .futuristic-option:hover {
+            background-color: #3a3a5a;
+            transform: translateY(-1px);
+            box-shadow: 0 0 5px rgba(0, 255, 255, 0.2); /* 青色輕微光暈 */
+        }
+        .futuristic-option.selected {
+            background-color: #008080; /* 深青色選中 */
+            border-color: #00FFFF; /* 霓虹青色邊框 */
+            transform: scale(1.02);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5); /* 霓虹光暈 */
+        }
+
+        /* 進度條與圖表 */
+        .progress-bar-container {
+            height: 12px;
+            border-radius: 6px;
+            background-color: #2a2a44;
+            overflow: hidden;
+            border: 1px solid #00FFFF;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #00FFFF; /* 霓虹青色進度條 */
+            transition: width 0.3s ease-out;
+        }
+        .mastery-bar-outer {
+            background-color: #2a2a44; 
+            height: 24px;
+            border-radius: 6px;
+        }
+        .mastery-bar-inner {
+            height: 100%;
+            transition: width 1s ease-out;
+            border-radius: 6px;
+        }
+        /* Accordion 樣式調整 */
+        .accordion-header {
+             background-color: #1a1a2e;
+        }
+        .accordion-content {
+            background-color: #21213c; /* 內容背景稍亮 */
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .accordion-content.open {
+            max-height: 500px;
+        }
+        /* LOGO 專屬光暈與浮動效果 (收斂光暈) */
+        .logo-glow {
+            /* 調整光暈半徑，使其更集中 */
+            filter: drop-shadow(0 0 3px rgba(0, 255, 255, 0.7)) drop-shadow(0 0 8px rgba(0, 255, 255, 0.1));
+        }
+
+        /* 圖片載入平滑淡入效果 */
+        .image-transition {
+            opacity: 0;
+            transition: opacity 0.5s ease-in;
+        }
+        .image-transition.loaded {
+            opacity: 1;
+        }
+        /* 就業方向說明單行顯示，不允許換行 */
+        .career-item-text {
+            display: flex;
+            align-items: flex-start;
+        }
+        .career-item-label {
+            white-space: nowrap;
+            flex-shrink: 0;
+            width: 140px; /* 給予足夠寬度 */
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 min-h-screen flex items-start justify-center">
+
+    <!-- 新增固定頂部 Header 區塊 (已修正尺寸與對齊) -->
+    <header id="main-header" class="px-4 md:px-8">
+        <!-- 容器置中 -->
+        <div class="flex items-center justify-center max-w-2xl mx-auto">
+            <!-- Logo 尺寸：32px -->
+            <img src="https://i.postimg.cc/7Ly3JFYs/TIMS-Logo-png.png" alt="台灣行銷科學學會 Logo" class="max-w-[32px] h-auto object-contain logo-glow transition-transform duration-500 mr-2">
+            
+            <div class="flex flex-col items-start leading-none">
+                <!-- 中文標題放大 (text-lg md:text-xl) -->
+                <h1 class="text-lg md:text-xl font-extrabold text-cyan-400 whitespace-nowrap">TIMS行銷天分測評</h1>
+                <!-- 英文副標題縮小 -->
+                <p class="text-xs font-light text-gray-400 mt-0.5 whitespace-nowrap">:: Marketing Talent Assessment ::</p>
+            </div>
+        </div>
+    </header>
+
+    <div id="content" class="w-full max-w-2xl mt-8">
+        <!-- 應用程式內容將動態載入此處 --></div>
+
+    <script>
+        // ----------------------------------------------------
+        // 核心題庫資料 (共 25 題) - 已替換為最新且完整的題目列表
+        // ----------------------------------------------------
+        const QUIZ_DATA = [
+            { chapterId: "CH1", chapterName: "行銷源典", question: "你如何看待「買一送一」的促銷優惠所帶來的營收增長？", imageUrl: "https://i.postimg.cc/fLGwYWL8/wei-ming-ming-1.jpg", options: [{ text: "這是暫時的手段，顧客是否還願意回購才是真正的關鍵。", score: 4 }, { text: "有效的短期戰術，創造消費者願意支付的價值。", score: 2 }, { text: "這是必要的價格讓利，能確最短時間內創造大量營收。", score: 1 }] },
+            { chapterId: "CH1", chapterName: "行銷源典", question: "有一位主管說：「本次母親節檔期促銷方案，讓我們的按摩椅大熱銷，這代表我們行銷做得很好。」你對於這段話的理解是？", imageUrl: "https://i.postimg.cc/bvRFjp4x/wei-ming-ming-2.jpg", options: [{ text: "不認同，因真正的成功關鍵在於能否建立品牌長期價值與顧客忠誠度。", score: 4 }, { text: "觀察態度。但代表我們至少成功讓消費者願意付費購買，確保產品在市場上有一定競爭力。", score: 2 }, { text: "認同，這可能代表我們的定價或促銷策略成功，創造了價格優勢。", score: 1 }] },
+            { chapterId: "CH10", chapterName: "行銷績效KPI", question: "若您在工作中收到一張新客戶的名片（LINE）之後，你會如何處理此通訊資料？", imageUrl: "https://i.postimg.cc/fbvghD1d/wei-ming-ming-3.jpg", options: [{ text: "記錄他工作相關資訊與興趣嗜好", score: 4 }, { text: "記錄當日的會面情境和聊天主題", score: 2 }, { text: "記錄他的電話和姓名", score: 1 }] },
+            { chapterId: "CH10", chapterName: "行銷績效KPI", question: "你經營一家便當店，有三種顧客類型。若以顧客價值來看，你會比較喜歡哪一種客人？", imageUrl: "https://i.postimg.cc/9fBNjCsP/wei-ming-ming-4.jpg", options: [{ text: "固定每週三、四都會跟你買一個便當的客人。", score: 4 }, { text: "不定時購買，但一次都買 30 個便當的客人。", score: 2 }, { text: "只有當你便當有促銷活動時，才會跟你買的客人。", score: 1 }] },
+            { chapterId: "CH10", chapterName: "行銷績效KPI", question: "手搖飲料總部現在有三種資源可以提供給您：1. 會員與銷售資料庫 2. 公司調查的消費者飲用偏好報告書 3. 資深品牌經理訪談機會。如果你今天想要開發新手搖飲品，你會傾向於使用哪一個資源輔助您開發新產品？", imageUrl: "https://i.postimg.cc/xdPFSnBK/wei-ming-ming-5.jpg", options: [{ text: "會員與銷售資料庫", score: 4 }, { text: "公司調查的消費者飲用偏好報告書", score: 2 }, { text: "資深品牌經理訪談機會", score: 1 }] },
+            { chapterId: "CH2", chapterName: "市場分析", question: "你會用什麼方式解釋現在喝手搖飲料的消費者特徵？", imageUrl: "https://i.postimg.cc/V6LZf2c4/wei-ming-ming-6.jpg", options: [{ text: "透過「喝飲料的情境」來解釋，例如：解饞型、分享型。", score: 4 }, { text: "透過「喝飲料的願付價格」來解釋。例如：偏好高價位、低價位。", score: 2 }, { text: "透過喝飲料的「性別」或「年齡」來解釋，例如：20-30 歲女性。", score: 1 }] },
+            { chapterId: "CH2", chapterName: "市場分析", question: "手搖飲料店已經競爭激烈的成熟市場，為了找出新機會，你會怎麼做？", imageUrl: "https://i.postimg.cc/76YtHjy1/wei-ming-ming-7.jpg", options: [{ text: "透過視覺化工具，找出競爭者尚未滿足的潛在市場空隙。", score: 4 }, { text: "研究競爭對手的價格和優惠活動，確保自家產品能提供更好的 CP 值。", score: 2 }, { text: "模仿強勢競爭者的熱門產品，並推出更低價格，以快速搶佔市場。", score: 1 }] },
+            { chapterId: "CH3", chapterName: "消費者行為", question: "你在搭飛機時，看到有人選擇坐「商務艙」，有人選擇坐「經濟艙」，你會怎麼解釋這種現象？", imageUrl: "https://i.postimg.cc/635bWFNr/wei-ming-ming-8.jpg", options: [{ text: "不同旅客追求的體驗而有所完全不同 。", score: 4 }, { text: "為了襯托身分地位感受上的需求", score: 2 }, { text: "收入水平的差異，反映出他們對金錢的承受能力不同 。", score: 1 }] },
+            { chapterId: "CH3", chapterName: "消費者行為", question: "你如何看待，便利商店會有這麼多礦泉水的品牌?", imageUrl: "https://i.postimg.cc/RFVpS2zP/wei-ming-ming-9.jpg", options: [{ text: "滿足消費者對多樣化的偏好，提供更多的選擇空間。", score: 4 }, { text: "商店的經營特色，就是要讓消費者隨時買到多樣商品。", score: 2 }, { text: "廠商希望透過不同包裝和品項，增加多種收入和曝光機會。", score: 1 }] },
+            { chapterId: "CH3", chapterName: "消費者行為", question: "消費者在購買需求通常呈現何種特性？", imageUrl: "https://i.postimg.cc/zBX2z41s/wei-ming-ming-10.jpg", options: [{ text: "多元且會隨時間、情境產生變化", score: 4 }, { text: "完全隨機、毫無規律", score: 2 }, { text: "只受價格因素影響", score: 1 }] },
+            { chapterId: "CH4", chapterName: "行銷研究", question: "若你想了解「消費者購買自動駕駛電動車的動機」，但市面上卻沒有相關完整資料，這時你「優先」會怎麼做？", imageUrl: "https://i.postimg.cc/9M88r1Wx/wei-ming-ming-11.jpg", options: [{ text: "焦點團體訪談，或邀請專家進行諮詢。", score: 4 }, { text: "運用次級資料（如政府統計、產業報告），進行初步探索。", score: 2 }, { text: "設計量化問卷，收集市場平均意見作為參考。", score: 1 }] },
+            { chapterId: "CH4", chapterName: "行銷研究", question: "在做一個對你而言「相對重要」的決定前，你傾向於？", imageUrl: "https://i.postimg.cc/fL22J5wq/wei-ming-ming-12.jpg", options: [{ text: "規劃蒐集客觀資料來驗證", score: 4 }, { text: "詢問身邊的人意見，讓多數人幫你決定。", score: 2 }, { text: "憑藉過往經驗或直覺，快速下決定。", score: 1 }] },
+            { chapterId: "CH5", chapterName: "產品策略", question: "假使你經營的咖啡店中，拿鐵系列很受歡迎，你希望加深它在顧客心中的價值，你會採取哪種策略?", imageUrl: "https://i.postimg.cc/85KKjw1q/wei-ming-ming-13.jpg", options: [{ text: "針對拿鐵推出不同奶種、不同口味的選項。", score: 4 }, { text: "增加新的輕食或甜點品類，豐富菜單。", score: 2 }, { text: "推出更實惠平價的優惠組合。", score: 1 }] },
+            { chapterId: "CH5", chapterName: "產品策略", question: "假如你在設計一款手搖飲料的杯子時，你會優先考量?", imageUrl: "https://i.postimg.cc/pTGGpkWN/wei-ming-ming-14.jpg", options: [{ text: "必須在架上一眼被看見，並且能清楚傳達品牌形象。", score: 4 }, { text: "必須確保其設計能充分保護產品，使其易於儲存和運輸。", score: 2 }, { text: "必須確保其尺寸和材質能有效降低生產成本。", score: 1 }] },
+            { chapterId: "CH5", chapterName: "產品策略", question: "你覺得產品「最重要的價值」是什麼？", imageUrl: "https://i.postimg.cc/W3WWhSNc/wei-ming-ming-15.jpg", options: [{ text: "必須清楚傳遞「為何而做」，能解決顧客最根本的需求。", score: 4 }, { text: "具備最好的硬體規格和穩定的基本功能，才能讓顧客買得安心。", score: 2 }, { text: "外觀設計藝術精美，並且有醒目品牌 Logo 。", score: 1 }] },
+            { chapterId: "CH5", chapterName: "產品策略", question: "當你發現你經營品牌，熱門產品的銷售開始下滑，你會怎麼辦？", imageUrl: "https://i.postimg.cc/C1PPzJhY/wei-ming-ming-16.jpg", options: [{ text: "分析是否競爭者太多，並思考產品創新或轉型機會", score: 4 }, { text: "認為是宣傳不夠，要求增加廣告預算", score: 2 }, { text: "降價促銷，把庫存清掉止損", score: 1 }] },
+            { chapterId: "CH6", chapterName: "品牌經營", question: "企業都想要建立自己品牌，你認為「品牌」最大的好處是什麼?", imageUrl: "https://i.postimg.cc/SsTTJVSQ/wei-ming-ming-17.jpg", options: [{ text: "消費者願意重複購買你的產品", score: 4 }, { text: "消費者願意花更多錢買你產品", score: 2 }, { text: "消費者對你的產品有高度好感", score: 1 }] },
+            { chapterId: "CH6", chapterName: "品牌經營", question: "你覺得為什麼消費者會特別忠於某特定品牌，並持續購買？", imageUrl: "https://i.postimg.cc/NMJJ5bsg/wei-ming-ming-18.jpg", options: [{ text: "因為已在心中已建立的獨特形象與連結。", score: 4 }, { text: "因為功能、品質可靠，以及實際效用。", score: 2 }, { text: "因為價格和性價比，以及是否划算。", score: 1 }] },
+            { chapterId: "CH7", chapterName: "定價策略", question: "如果有消費者跟你抱怨：「你們品牌的家電冰箱很貴。」以下哪一種是你最有可能回覆內容？", imageUrl: "https://i.postimg.cc/k411BwJg/wei-ming-ming-19.jpg", options: [{ text: "強調產品能解決顧客什麼樣的核心問題。", score: 4 }, { text: "告知產品已是業界相同規格中的最低價，且性價比最高。", score: 2 }, { text: "建議顧客使用分期付款或現金折扣，促進成交。", score: 1 }] },
+            { chapterId: "CH7", chapterName: "定價策略", question: "在決定一個產品價格時，你認為最關鍵的考量點是？", imageUrl: "https://i.postimg.cc/j5ggLvxj/wei-ming-ming-20.jpg", options: [{ text: "顧客認為這個產品或服務值多少錢。", score: 4 }, { text: "製作這個產品的總成本是多少，然後加上合理的利潤。", score: 2 }, { text: "競爭對手的價格是多少，我只要比他們低一點。", score: 1 }] },
+            { chapterId: "CH8", chapterName: "推廣策略", question: "如果你開一家手搖飲料店，想要辦理開幕活動，以下哪一種策略是你最傾向舉辦?", imageUrl: "https://i.postimg.cc/d1HHLnsk/wei-ming-ming-21.jpg", options: [{ text: "加入會員後，可集點紅利回饋", score: 4 }, { text: "買飲料送折價券 (下次使用)", score: 2 }, { text: "熱門飲品買一送一活動", score: 1 }] },
+            { chapterId: "CH8", chapterName: "推廣策略", question: "你覺得「廣告」跟「媒體」是否有差別?", imageUrl: "https://i.postimg.cc/gJSSn4zw/wei-ming-ming-22.jpg", options: [{ text: "兩者有明顯差別", score: 4 }, { text: "兩者有部分重疊", score: 2 }, { text: "幾乎沒有差別", score: 1 }] },
+            { chapterId: "CH8", chapterName: "推廣策略", question: "如果你是手搖飲料品牌行銷經理，你會期望用什麼管道推播公司開發的新產品正式發售？", imageUrl: "https://i.postimg.cc/7h5B77hq/wei-ming-ming-23.jpg", options: [{ text: "透過自己建立的官方社群曝光", score: 4 }, { text: "付費給公信力高的媒體進行報導", score: 2 }, { text: "投放人流量較高的戶外看板廣告", score: 1 }] },
+            { chapterId: "CH9", chapterName: "通路策略", question: "「源家」是你在經營手工水餃品牌，賣點訴求就是家鄉手工風味，全台僅一家經營，至今為止生意都很好。假如今天有一家企業想投資你生產製作冷凍水餃，你的反應是？", imageUrl: "https://i.postimg.cc/j2D8NN2x/wei-ming-ming-24.jpg", options: [{ text: "不合作，忠於原本的手工堅持，不生產冷凍水餃。", score: 4 }, { text: "積極合作，擴大市場規模，將產品推向更廣泛的消費族群 。", score: 2 }, { text: "可以合作，但僅以「源家」品牌名稱開發其他系列冷凍食品。", score: 1 }] },
+            { chapterId: "CH9", chapterName: "通路策略", question: "一瓶礦泉水在便利商店賣 20 元，但是在百貨公司可以賣 40 元，你會如何解釋這現象？", imageUrl: "https://i.postimg.cc/HnrS55nk/wei-ming-ming-25.jpg", options: [{ text: "因百貨公司為產品創造了不同的品牌價值。", score: 4 }, { text: "因百貨公司的營運和上架費用比便利商店高。", score: 2 }, { text: "因在百貨公司內，這類產品的競爭品牌相對較少。", score: 1 }] }
+        ];
+
+        // 新增四大能力分類對應 (已更新)
+        const COMPETENCY_MAPPING = {
+            '洞察市場與消費者': ['CH1', 'CH2', 'CH3', 'CH4'],
+            '擬定行銷策略': ['CH5', 'CH6', 'CH7'],
+            '設計行銷活動內容': ['CH8', 'CH9'],
+            '評估績效並調整': ['CH10']
+        };
+        
+        // 四大能力對應的 SVG 圖示
+        const COMPETENCY_ICONS = {
+            '洞察市場與消費者': `<svg class="w-5 h-5 mr-2 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>`, // 放大鏡
+            '擬定行銷策略': `<svg class="w-5 h-5 mr-2 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 2m0 0l-2-2m2 2v2M9.69 19L2 12l7.69-7M14.31 5L22 12l-7.69 7"></path></svg>`, // 羅盤/方向
+            '設計行銷活動內容': `<svg class="w-5 h-5 mr-2 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>`, // 閃電/活動
+            '評估績效並調整': `<svg class="w-5 h-5 mr-2 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M17 14h-7m5 4h-5m7 2H7a2 2 0 01-2-2V5a2 2 0 012-2h10a2 2 0 012 2v14a2 2 0 01-2 2z"></path></svg>` // 圖表/趨勢
+        };
+
+        // ----------------------------------------------------
+        // 全域變數與狀態管理
+        // ----------------------------------------------------
+        let quizState = {
+            currentQuiz: [],        // 亂數排序後的題目陣列
+            currentIndex: 0,        // 當前題號索引
+            answers: new Array(QUIZ_DATA.length).fill(null) // 儲存使用者答案 (直接儲存分數 4, 2, 1)
+        };
+
+        const CONTENT_ID = 'content';
+        const START_BUTTON_ID = 'start-button';
+        const NEXT_BUTTON_ID = 'next-button';
+        const RETRY_BUTTON_ID = 'retry-button';
+        
+        // **固定呈現的順序 (已修正為最新的使用者需求)**
+        const FIXED_COMPETENCY_ORDER = [
+            '洞察市場與消費者',
+            '擬定行銷策略',
+            '設計行銷活動內容',
+            '評估績效並調整'
+        ];
+
+        // ----------------------------------------------------
+        // 核心函式
+        // ----------------------------------------------------
+        
+        /**
+         * 簡易 HTML 內容逸出，防止字串中包含的引號或特殊符號破壞 HTML 結構。
+         * @param {string} str
+         * @returns {string}
+         */
+        function escapeHtml(str) {
+            if (typeof str !== 'string') return '';
+            return str.replace(/[&<>"']/g, function(m) {
+                return {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                }[m];
+            });
+        }
+
+        /**
+         * 顯示錯誤訊息 (用於捕捉靜默錯誤)
+         * @param {string} message - 錯誤訊息
+         * @param {string} detail - 錯誤詳細資訊
+         */
+        function displayError(message, detail) {
+            const content = document.getElementById(CONTENT_ID);
+            if (content) {
+                 content.innerHTML = `
+                    <div class="futuristic-card text-center p-8 bg-red-900 border border-red-700">
+                        <h1 class="text-3xl font-bold text-red-500 mb-4">系統錯誤 (SYSTEM ERROR)</h1>
+                        <p class="text-red-400 mb-6">${message}</p>
+                        <pre class="text-xs text-red-300 text-left whitespace-pre-wrap">${detail || '無詳細錯誤資訊。'}</pre>
+                        <button class="futuristic-button mt-4" onclick="window.location.reload()">重新啟動</button>
+                    </div>
+                `;
+            } else {
+                console.error("Critical Error: Cannot find content div.", message, detail);
+            }
+        }
+
+        /**
+         * 亂數打亂陣列順序 (Fisher-Yates Shuffle)
+         * @param {Array} array
+         */
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        /**
+         * 處理選項點擊事件 (使用 Event Delegation)
+         * @param {Event} event
+         */
+        function handleOptionClick(event) {
+            try {
+                const element = event.target.closest('.futuristic-option');
+                if (!element) return;
+
+                const questionElement = element.closest('.question-block');
+                // 確保這裡使用 10 作為 radix
+                const originalIndex = parseInt(questionElement.getAttribute('data-original-index'), 10);
+                const score = parseInt(element.getAttribute('data-score'), 10);
+
+                // 移除所有選項的選中狀態
+                const options = questionElement.querySelectorAll('.futuristic-option');
+                options.forEach(opt => opt.classList.remove('selected'));
+
+                // 設定當前選項的選中狀態
+                element.classList.add('selected');
+
+                // 儲存答案 (直接儲存分數)
+                quizState.answers[originalIndex] = score;
+
+                // 啟用下一題按鈕
+                const nextButton = document.getElementById(NEXT_BUTTON_ID);
+                if (nextButton) {
+                    nextButton.disabled = false;
+                }
+                
+                // *** 圖片載入優化: 預先載入下一張圖片 ***
+                preloadNextImage();
+
+            } catch (e) {
+                displayError("選項點擊處理錯誤", e.message);
+            }
+        }
+        
+        /**
+         * 預先載入下一張圖片
+         */
+        function preloadNextImage() {
+            const nextIndexInCurrentQuiz = quizState.currentIndex + 1;
+            if (nextIndexInCurrentQuiz < quizState.currentQuiz.length) {
+                const nextQuestion = quizState.currentQuiz[nextIndexInCurrentQuiz];
+                const nextImageUrl = nextQuestion.imageUrl;
+                
+                if (nextImageUrl) {
+                    const img = new Image();
+                    img.src = nextImageUrl;
+                    // console.log(`Preloading image for Q${nextIndexInCurrentQuiz + 1}: ${nextImageUrl}`); // 輔助除錯
+                }
+            }
+        }
+
+        /**
+         * 渲染開始畫面
+         */
+        function renderStartScreen() {
+            try {
+                const content = document.getElementById(CONTENT_ID);
+                if (!content) throw new Error("Content container not found.");
+
+                // 替換圖示為「數位晶片/分析」意象
+                const GuideIcon = `<svg class="w-5 h-5 mr-2 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2h10a2 2 0 012 2v2m-7-7V3"></path></svg>`; // 數據板/晶片
+
+                content.innerHTML = `
+                    <div class="futuristic-card text-center p-8 mt-2">
+                        
+                        <!-- 移除中間的首頁圖片 <img> -->
+
+                        <!-- 修正：潛能 -> 天分 -->
+                        <p class="text-lg text-gray-300 mb-6">台灣行銷科學學會 - 你的行銷天分探索之旅</p>
+
+                        <div class="text-left bg-[#130E20] p-6 rounded-xl mb-8 border border-cyan-500/20 shadow-neon-cyan">
+                            <!-- 增加字體大小/間距 -->
+                            <p class="font-semibold text-orange-400 mb-4 flex items-center text-lg">
+                                ${GuideIcon}
+                                測驗指南 - 尋找你的原始天分
+                            </p>
+                            <!-- 優化清單排版 -->
+                            <ul class="text-sm text-gray-300 space-y-4 ml-2"> 
+                                <li class="flex items-start">
+                                    <span class="text-cyan-400 font-bold mr-3 mt-0.5 text-xl leading-none">•</span>
+                                    <div class="flex-1">
+                                        <span class="text-cyan-400 font-bold text-lg">探索天分：</span> 
+                                        <!-- 修正：內文替換為最新的需求 -->
+                                        <div class="mt-1">透過這25測評，我們將量化你的<span class="text-orange-400 font-bold">行銷天分值</span>，並轉換為未來職涯方向的建議。</div>
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-cyan-400 font-bold mr-3 mt-0.5 text-xl leading-none">•</span>
+                                    <div class="flex-1">
+                                        <!-- 修正：標題替換 -->
+                                        <span class="text-cyan-400 font-bold text-lg">直覺優先：</span> 
+                                        <!-- 修正：內文替換並保持顏色交換的邏輯 -->
+                                        <div class="mt-1">
+                                            <span class="text-gray-300">本測評無關你過去的專業或工作背景！</span> 
+                                            <span class="text-orange-400 font-bold">請憑藉你的第一觀點或直覺來作答。</span>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-cyan-400 font-bold mr-3 mt-0.5 text-xl leading-none">•</span>
+                                    <div class="flex-1">
+                                        <!-- 修正：標題替換 -->
+                                        <span class="text-cyan-400 font-bold text-lg">認證前哨戰：</span> 
+                                        <!-- 修正：內文替換 -->
+                                        <div class="mt-1">讓你精準了解哪個章節是你的天生強項，哪個章節又是補強重點！</div>
+                                    </div>
+                                </li>
+                            </ul>
+                            <!-- 結束清單優化 -->
+                        </div>
+
+                        <button id="${START_BUTTON_ID}" class="futuristic-button text-lg">
+                            開始測評
+                        </button>
+                    </div>
+                `;
+                document.getElementById(START_BUTTON_ID).addEventListener('click', startQuiz);
+
+            } catch (e) {
+                displayError("渲染開始畫面錯誤", e.message);
+            }
+        }
+
+        /**
+         * 開始測驗，亂數打亂題目並渲染第一頁
+         */
+        function startQuiz() {
+            try {
+                // 複製題庫並亂數打亂
+                quizState.currentQuiz = shuffleArray([...QUIZ_DATA].map((q, originalIndex) => {
+                    // 為每個題目內部也亂數打亂選項順序，並將亂數後的選項儲存起來
+                    const shuffledOptions = shuffleArray([...q.options]);
+                    return { ...q, originalIndex, shuffledOptions };
+                }));
+
+                quizState.currentIndex = 0;
+                quizState.answers.fill(null); // 重置答案
+                renderQuizScreen();
+            } catch (e) {
+                displayError("開始測驗初始化錯誤", e.message);
+            }
+        }
+
+        /**
+         * 渲染測驗頁面
+         */
+        function renderQuizScreen() {
+            try {
+                const content = document.getElementById(CONTENT_ID);
+                if (!content) throw new Error("Content container not found.");
+
+                const currentItem = quizState.currentQuiz[quizState.currentIndex];
+                if (!currentItem) return; // 防止越界
+
+                const totalQuestions = quizState.currentQuiz.length;
+                const currentNumber = quizState.currentIndex + 1;
+                const progress = (currentNumber / totalQuestions) * 100;
+                const originalIndex = currentItem.originalIndex; // 用來儲存答案的索引
+
+                // 使用已經在 startQuiz 階段亂數打亂並儲存的選項陣列
+                const shuffledOptions = currentItem.shuffledOptions;
+                const imageUrl = currentItem.imageUrl || 'https://placehold.co/600x300/e0e0e0/505050?text=Placeholder'; // 確保有圖或佔位圖
+
+                // 構建選項 HTML
+                const optionsHtml = shuffledOptions.map((option, idx) => {
+                    // 檢查是否已作答，並恢復選中狀態
+                    const savedScore = quizState.answers[originalIndex];
+                    const isSelected = savedScore === option.score;
+
+                    return `
+                        <div 
+                            class="futuristic-option rounded-xl p-4 mb-3 text-left cursor-pointer ${isSelected ? 'selected' : ''}"
+                            data-score="${option.score}"
+                            data-original-index="${originalIndex}"
+                        >
+                            <span class="font-semibold mr-2 text-cyan-400">${String.fromCharCode(65 + idx)}.</span> ${escapeHtml(option.text)}
+                        </div>
+                    `;
+                }).join('');
+
+                content.innerHTML = `
+                    <div class="futuristic-card question-block p-6 md:p-8" data-original-index="${originalIndex}">
+                        <div class="flex justify-between items-center mb-4">
+                            <!-- 修正：任務進度旁加入白色題數顯示 -->
+                            <span class="text-sm font-semibold text-orange-400">
+                                任務進度 
+                                <span class="text-gray-200 ml-1">(${currentNumber} / ${totalQuestions} 題)</span>
+                            </span>
+                        </div>
+                        
+                        <div class="progress-bar-container mb-6">
+                            <div class="progress-bar" style="width: ${progress.toFixed(2)}%;"></div>
+                        </div>
+
+                        <h2 class="text-xl font-bold text-gray-200 mb-6">Q${currentNumber}. ${escapeHtml(currentItem.question)}</h2>
+
+                        <!-- 題目圖片顯示區塊 (放在題目與選項之間) -->
+                        <div class="mb-6 text-center">
+                            <!-- 圖片優化: Lazy Loading + 淡入效果 -->
+                            <img 
+                                id="current-quiz-image"
+                                src="${imageUrl}" 
+                                alt="題目示意圖" 
+                                class="w-full h-auto object-contain rounded-lg shadow-lg shadow-cyan-500/20 image-transition"
+                                loading="lazy" 
+                                onerror="this.onerror=null; this.src='https://placehold.co/600x300/e0e0e0/505050?text=Image+Load+Error';"
+                            >
+                        </div>
+                        <!-- 結束圖片區塊 -->
+
+                        <div class="space-y-3 mb-8 options-container">
+                            ${optionsHtml}
+                        </div>
+
+                        <div class="flex justify-end">
+                            <button id="${NEXT_BUTTON_ID}" class="futuristic-button" ${quizState.answers[originalIndex] === null ? 'disabled' : ''}>
+                                ${currentNumber === totalQuestions ? '解鎖結果分析' : '下一題'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+                 document.getElementById(NEXT_BUTTON_ID).addEventListener('click', nextQuestion);
+                 
+                 // 圖片載入完成後增加 loaded class，觸發淡入效果
+                 const imgElement = document.getElementById('current-quiz-image');
+                 if (imgElement) {
+                     imgElement.onload = () => imgElement.classList.add('loaded');
+                     // 如果圖片已在快取中，手動觸發 loaded
+                     if (imgElement.complete) imgElement.classList.add('loaded');
+                 }
+
+            } catch (e) {
+                displayError("渲染測驗畫面錯誤", e.message);
+            }
+        }
+
+        /**
+         * 處理下一題/查看結果按鈕
+         */
+        function nextQuestion() {
+            try {
+                const currentItem = quizState.currentQuiz[quizState.currentIndex];
+                const originalIndex = currentItem.originalIndex;
+
+                // 檢查是否已作答
+                if (quizState.answers[originalIndex] === null) {
+                    // 使用內聯訊息代替 alert
+                    const nextButton = document.getElementById(NEXT_BUTTON_ID);
+                    if (nextButton) {
+                        nextButton.textContent = '請先選擇一個選項！';
+                        setTimeout(() => {
+                             nextButton.textContent = (quizState.currentIndex < quizState.currentQuiz.length - 1) ? '下一題' : '查看結果';
+                        }, 1500);
+                    }
+                    return;
+                }
+
+                if (quizState.currentIndex < quizState.currentQuiz.length - 1) {
+                    quizState.currentIndex++;
+                    renderQuizScreen();
+                } else {
+                    calculateResults();
+                }
+                
+                // *** 新增：點擊下一題後，網頁自動捲動到頂部 ***
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                // *** 圖片載入優化: 預先載入下一張圖片 (在點擊下一題時觸發) ***
+                preloadNextImage();
+
+            } catch (e) {
+                displayError("處理下一題錯誤", e.message);
+            }
+        }
+
+        /**
+         * 計算並顯示測驗結果
+         */
+        function calculateResults() {
+            try {
+                const chapterScores = {};
+                const chapterMaxScores = {};
+                const chapterNames = {};
+                let actualTotalScore = 0;
+                
+                // 1. 彙總章節分數
+                QUIZ_DATA.forEach((question, originalIndex) => {
+                    const chapterId = question.chapterId;
+                    const chapterName = question.chapterName;
+                    const answeredScore = quizState.answers[originalIndex];
+
+                    // 確保章節初始化
+                    if (!chapterScores[chapterId]) {
+                        chapterScores[chapterId] = 0;
+                        chapterMaxScores[chapterId] = 0;
+                        chapterNames[chapterId] = question.chapterName;
+                    }
+
+                    // 該題滿分固定為 4 分
+                    const questionMaxScore = 4;
+                    chapterMaxScores[chapterId] += questionMaxScore;
+
+                    // 取得實際得分
+                    if (answeredScore !== null) {
+                        const score = answeredScore;
+                        chapterScores[chapterId] += score;
+                        actualTotalScore += score;
+                    }
+                });
+
+
+                // 2. 計算總分與天分值 (原始總分範圍 25-100)
+                // 轉換公式: 50 + (實際總分 - 25) * (50 / 75)
+                const marketingAptitudeValue = Math.round(50 + (actualTotalScore - 25) * (50 / 75));
+
+                // 3. 計算章節掌握百分比 (Mastery Percentage)
+                const chapterResults = Object.keys(chapterScores).map(chapterId => {
+                    const maxScore = chapterMaxScores[chapterId]; // 章節滿分
+                    const actualScore = chapterScores[chapterId]; // 章節實際得分
+
+                    // 防除以零錯誤
+                    const masteryPercentage = maxScore > 0 ? (actualScore / maxScore) * 100 : 0;
+
+                    return {
+                        chapterId: chapterId,
+                        chapterName: chapterNames[chapterId],
+                        masteryPercentage: Math.min(100, Math.round(masteryPercentage)) // 確保不超過 100%
+                    };
+                });
+                
+                // --- NEW: 為整體章節概覽創建排序列表 (由低到高) ---
+                const sortedChapterOverview = [...chapterResults].sort((a, b) => a.masteryPercentage - b.masteryPercentage);
+                // ----------------------------------------------------
+
+
+                // 4. 彙整並計算四大能力平均掌握百分比
+                let competencyResults = Object.entries(COMPETENCY_MAPPING).map(([compName, chapterIds]) => {
+                    let totalMastery = 0;
+                    let count = 0;
+                    
+                    const detailedChapters = chapterResults
+                        .filter(cr => chapterIds.includes(cr.chapterId))
+                        .sort((a, b) => a.masteryPercentage - b.masteryPercentage); // 補強優先級排序 (章節內部)
+
+                    detailedChapters.forEach(chapter => {
+                        totalMastery += chapter.masteryPercentage;
+                        count++;
+                    });
+
+                    // 能力平均掌握百分比 (細項章節掌握百分比的平均)
+                    const averageMastery = count > 0 ? Math.round(totalMastery / count) : 0;
+                    
+                    return {
+                        compName,
+                        averageMastery,
+                        detailedChapters
+                    };
+                });
+                
+                // 依照最新的固定順序排序四大能力
+                competencyResults.sort((a, b) => {
+                    const indexA = FIXED_COMPETENCY_ORDER.indexOf(a.compName);
+                    const indexB = FIXED_COMPETENCY_ORDER.indexOf(b.compName);
+                    // 確保找不到的項目排在最後（理論上不會發生）
+                    if (indexA === -1 && indexB === -1) return 0;
+                    if (indexA === -1) return 1;
+                    if (indexB === -1) return -1;
+                    return indexA - indexB;
+                });
+
+
+                const results = {
+                    totalScore: marketingAptitudeValue,
+                    competencyResults: competencyResults,
+                    chapterResults: chapterResults, // 原始章節結果 (備用)
+                    sortedChapterOverview: sortedChapterOverview // 新增排序過的章節總覽
+                };
+
+                renderResultScreen(results);
+                
+                // *** 新增：查看結果後，網頁自動捲動到頂部 ***
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            } catch (e) {
+                displayError("計算結果錯誤", e.message);
+            }
+        }
+        
+        /**
+         * 處理手風琴展開/收合
+         */
+        function toggleAccordion(compName) {
+            try {
+                // *** 修正: 檢查 compName 是否為空 ***
+                if (!compName) return; 
+
+                const compId = compName.replace(/\s/g, '-');
+                const contentElement = document.getElementById(`content-${compId}`);
+                const iconElement = document.getElementById(`icon-${compId}`);
+
+                if (contentElement.classList.contains('open')) {
+                    contentElement.classList.remove('open');
+                    iconElement.classList.remove('rotate-180');
+                } else {
+                    contentElement.classList.add('open');
+                    iconElement.classList.add('rotate-180');
+                }
+            } catch (e) {
+                console.error("Accordion Toggle Error:", e);
+            }
+        }
+
+        /**
+         * 渲染結果頁面
+         * @param {Object} results - 測驗結果
+         */
+        function renderResultScreen(results) {
+            try {
+                const content = document.getElementById(CONTENT_ID);
+                let scoreTextClass;
+
+                if (results.totalScore >= 85) {
+                    scoreTextClass = 'text-yellow-400 shadow-neon-orange/50';
+                } else if (results.totalScore >= 65) {
+                    scoreTextClass = 'text-cyan-400 shadow-neon-cyan/50';
+                } else {
+                    scoreTextClass = 'text-red-500 shadow-neon-orange/50';
+                }
+
+                // --- 構建所有章節掌握度概覽 HTML ---
+                const chapterOverviewHtml = results.sortedChapterOverview.map(chapter => {
+                    const percentage = chapter.masteryPercentage;
+                    let colorClass = 'bg-lime-600'; // 霓虹綠
+                    let textColorClass = 'text-lime-400';
+                    if (percentage < 60) {
+                        colorClass = 'bg-red-600'; // 霓虹紅
+                        textColorClass = 'text-red-400';
+                    } else if (percentage < 80) {
+                        colorClass = 'bg-yellow-600'; // 鮮黃色
+                        textColorClass = 'text-yellow-400';
+                    }
+                    const widthStyle = `width: ${Math.max(0, percentage)}%;`;
+
+                    return `
+                        <div class="flex items-center mb-2">
+                            <span class="text-sm text-gray-400 w-1/3 md:w-1/4 whitespace-nowrap overflow-hidden text-ellipsis">${escapeHtml(chapter.chapterId)} ${escapeHtml(chapter.chapterName)}</span>
+                            <div class="flex-grow mx-2">
+                                <div class="mastery-bar-outer h-3 bg-gray-700">
+                                    <div class="mastery-bar-inner ${colorClass}" style="${widthStyle}"></div>
+                                </div>
+                            </div>
+                            <span class="text-sm font-bold ${textColorClass} w-10 text-right">${percentage}%</span>
+                        </div>
+                    `;
+                }).join('');
+                // ---------------------------------------------
+
+
+                // 構建四大能力卡片
+                const competencyHtml = results.competencyResults.map(comp => {
+                    const percentage = comp.averageMastery;
+                    let colorClass = 'bg-lime-500'; // 良好: 霓虹綠
+                    let textColorClass = 'text-lime-500';
+                    if (percentage < 60) {
+                        colorClass = 'bg-red-500'; // 最需補強: 霓虹紅
+                        textColorClass = 'text-red-500';
+                    } else if (percentage < 80) {
+                        colorClass = 'bg-yellow-400'; // 中度掌握: 鮮黃色
+                        textColorClass = 'text-yellow-400';
+                    }
+                    
+                    const compId = comp.compName.replace(/\s/g, '-'); // 轉換為 ID 使用
+                    const widthStyle = `width: ${Math.max(0, percentage)}%;`;
+                    const compIcon = COMPETENCY_ICONS[comp.compName] || ''; // 取得對應圖示
+
+                    // 構建細項章節 HTML
+                    const chapterDetailHtml = comp.detailedChapters.map(chapter => {
+                        const chapPercentage = chapter.masteryPercentage;
+                        let chapColorClass = 'bg-lime-700'; // 深一點的霓虹綠
+                        let chapTextColorClass = 'text-lime-400';
+                        if (chapPercentage < 60) {
+                            chapColorClass = 'bg-red-700'; // 深一點的霓虹紅
+                            chapTextColorClass = 'text-red-400';
+                        } else if (chapPercentage < 80) {
+                            chapColorClass = 'bg-yellow-700'; // 深一點的鮮黃
+                            chapTextColorClass = 'text-yellow-400';
+                        }
+                        const chapWidthStyle = `width: ${Math.max(0, chapPercentage)}%;`;
+
+                        return `
+                            <div class="mb-3">
+                                <div class="flex justify-between items-center text-sm text-gray-400 mb-1">
+                                    <span>${escapeHtml(chapter.chapterId)} ${escapeHtml(chapter.chapterName)}</span>
+                                    <span class="font-bold ${chapTextColorClass}">${chapPercentage}%</span>
+                                </div>
+                                <div class="mastery-bar-outer h-2 bg-gray-700">
+                                    <div class="mastery-bar-inner ${chapColorClass}" style="${chapWidthStyle}"></div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+
+
+                    return `
+                        <div class="mb-4 futuristic-card p-0 shadow-none border-none">
+                            <!-- 頂層可點擊區域 -->
+                            <div id="header-${compId}" class="flex justify-between items-center p-4 cursor-pointer accordion-header hover:bg-gray-700 rounded-lg shadow-md border-b-2 border-cyan-500/10" data-comp-name="${escapeHtml(comp.compName)}">
+                                <div class="flex items-center w-2/5 md:w-1/3 min-w-[150px]">
+                                    ${compIcon}
+                                    <h3 class="text-sm md:text-base font-bold text-gray-200 whitespace-nowrap overflow-hidden text-ellipsis">
+                                        ${escapeHtml(comp.compName)}
+                                    </h3>
+                                </div>
+                                <div class="flex-grow mx-2 min-w-[100px]"> <!-- 確保長條圖有最小寬度 -->
+                                    <div class="mastery-bar-outer bg-gray-700">
+                                        <div class="mastery-bar-inner ${colorClass}" style="${widthStyle}"></div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center w-1/5 md:w-1/6 justify-end">
+                                    <span class="text-xl font-extrabold ${textColorClass}">${percentage}%</span>
+                                    <svg id="icon-${compId}" class="w-5 h-5 ml-2 text-cyan-400 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </div>
+                            </div>
+
+                            <!-- 展開內容 (Accordion Content) -->
+                            <div id="content-${compId}" class="accordion-content">
+                                <div class="p-4 pt-0 mt-2">
+                                    <p class="text-sm font-semibold text-gray-300 mb-3">細項章節掌握百分比 (補強優先級：由上至下)</p>
+                                    ${chapterDetailHtml}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                // 新增就業方向說明 HTML (已優化排版)
+                const careerGuidanceHtml = `
+                    <ul class="text-sm text-gray-300 space-y-2 mb-4">
+                        <li class="career-item-text">
+                            <span class="text-cyan-400 font-bold mr-2 career-item-label">1. 洞察市場與消費者：</span>
+                            <span class="flex-grow">收集並分析市場資料、競爭者動向與消費者行為，作為策略規劃的基礎。</span>
+                        </li>
+                        <li class="career-item-text">
+                            <span class="text-cyan-400 font-bold mr-2 career-item-label">2. 擬定行銷策略：</span>
+                            <span class="flex-grow">根據品牌定位與目標客群設計整體行銷主軸、訊息架構與溝通方式。</span>
+                        </li>
+                        <li class="career-item-text">
+                            <span class="text-cyan-400 font-bold mr-2 career-item-label">3. 設計行銷活動內容：</span>
+                            <span class="flex-grow">策劃活動主題、內容素材與通路策略，提升消費者接觸與參與。</span>
+                        </li>
+                        <li class="career-item-text">
+                            <span class="text-cyan-400 font-bold mr-2 career-item-label">4. 評估績效並調整：</span>
+                            <span class="flex-grow">檢視KPI達成率，從數據中找出問題點並提出修正建議。</span>
+                        </li>
+                    </ul>
+                `;
+
+
+                content.innerHTML = `
+                    <div class="futuristic-card text-center p-8">
+                        <h1 class="text-3xl font-bold text-orange-400 mb-6 border-b border-cyan-500/30 pb-2">:: 測驗結果分析報告 ::</h1>
+                        
+                        <!-- 總分區塊 -->
+                        <div class="bg-[#130E20] p-6 rounded-xl mb-8 border border-cyan-500/20 shadow-neon-cyan">
+                            <p class="text-lg text-cyan-400 mb-2">您的行銷天分值：</p>
+                            <div class="flex items-center justify-center">
+                                <!-- 移除 iconSvg，只保留分數 -->
+                                <p class="text-6xl font-extrabold ${scoreTextClass}">${results.totalScore}</p>
+                            </div>
+                            <p class="text-gray-500 mt-2">（滿分 100 分）</p>
+                        </div>
+
+                        <!-- 調整後的：各領域掌握度分析 (整體章節補強優先級) -->
+                        <div class="text-left mb-8 p-4 bg-[#1a1a2e] rounded-xl border border-cyan-500/10 shadow-lg">
+                            <!-- 標題強化 -->
+                            <h2 class="text-xl md:text-2xl font-extrabold text-cyan-400 mb-4 pb-2 title-glow flex items-center">
+                                <svg class="w-6 h-6 mr-2 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19C7.794 19 7 18.206 7 17s.794-2 2-2 2 .794 2 2-.794 2-2 2zM21 16c1.206 0 2 .794 2 2s-.794 2-2 2-2-.794-2-2 .794-2 2-2zM9 19V6l12-3v13"></path></svg>
+                                各領域掌握度分析
+                            </h2>
+                            <!-- 核心說明 -->
+                            <div class="mb-4 text-sm text-gray-300">
+                                <p class="mb-1">
+                                    <span class="font-bold text-lime-400">💡 掌握度高</span>：代表您的直覺觀點與該章節的核心概念高度契合，未來閱讀教材時會有更強的「共鳴感」與「回饋感」。
+                                </p>
+                                <p class="mt-1">
+                                    <span class="font-bold text-red-500">📉 掌握度低</span>：這可能代表您的既有觀念與該章節的知識點存在落差，是您準備認證考試時，最需要加強複習和避免「快速遺忘」的領域！
+                                </p>
+                            </div>
+                            <!-- 修正說明文字 -->
+                            <div class="text-sm text-orange-400 mb-3 border-b border-gray-800 pb-2 flex items-start">
+                                <svg class="w-4 h-4 mr-1 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                <div>
+                                    <span class="font-bold">學習建議：</span>
+                                    <span>雖然以下章節依「掌握度百分比」由低至高排列，但仍建議您按照<span class="text-cyan-400 font-bold">CH1 → CH10</span>的順序閱讀，可更完整建立學習脈絡與邏輯架構。</span>
+                                </div>
+                            </div>
+                            ${chapterOverviewHtml}
+                        </div>
+                        <!-- END OF 各領域掌握度分析 -->
+
+
+                        <!-- 四大能力分類區塊 (已改名) -->
+                        <div class="text-left mb-8">
+                            <!-- 標題強化 -->
+                            <h2 class="text-xl md:text-2xl font-extrabold text-cyan-400 mb-4 pb-2 title-glow flex items-center">
+                                <svg class="w-6 h-6 mr-2 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                                行銷企劃就業方向
+                            </h2>
+                            
+                            <!-- 新增就業方向說明 (已優化排版) -->
+                            ${careerGuidanceHtml}
+                            
+                            <div id="competency-list">
+                                ${competencyHtml}
+                            </div>
+                        </div>
+
+                        <button id="${RETRY_BUTTON_ID}" class="futuristic-button">
+                            返回首頁
+                        </button>
+                    </div>
+                `;
+                
+                // 註冊按鈕事件
+                document.getElementById(RETRY_BUTTON_ID).addEventListener('click', renderStartScreen);
+                
+                // 註冊手風琴事件委派
+                const competencyList = document.getElementById('competency-list');
+                competencyList.addEventListener('click', (e) => {
+                    const header = e.target.closest('[id^="header-"]');
+                    if (header) {
+                        const compName = header.getAttribute('data-comp-name');
+                        toggleAccordion(compName);
+                    }
+                });
+
+
+            } catch (e) {
+                displayError("渲染結果畫面錯誤", e.message);
+            }
+        }
+
+        /**
+         * 應用程式啟動與事件監聽設定
+         */
+        function initApp() {
+            try {
+                const content = document.getElementById(CONTENT_ID);
+                if (!content) throw new Error("Content container not found on initialization.");
+                
+                // 設定 Event Delegation: 監聽整個內容區域的點擊事件 (用於選項)
+                content.addEventListener('click', (event) => {
+                    // 檢查是否點擊了選項
+                    if (event.target.closest('.futuristic-option')) {
+                        handleOptionClick(event);
+                    }
+                });
+
+                // 首次渲染開始畫面
+                renderStartScreen();
+            } catch (e) {
+                displayError("應用程式啟動錯誤", e.message);
+            }
+        }
+
+
+        // 確保 DOM 完全載入後再執行初始化
+        document.addEventListener('DOMContentLoaded', initApp);
+
+    </script>
+</body>
+</html>
