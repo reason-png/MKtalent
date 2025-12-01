@@ -109,7 +109,7 @@
         }
         .mastery-bar-outer {
             background-color: #2a2a44; 
-            height: 24px;
+            height: 20px; /* 統一長條圖高度 */
             border-radius: 6px;
         }
         .mastery-bar-inner {
@@ -710,15 +710,18 @@
                     const widthStyle = `width: ${Math.max(0, percentage)}%;`;
 
                     return `
-                        <div class="flex items-center mb-2">
-                            <!-- 修正：手機上章節名稱使用 text-xs 減少裁切 -->
-                            <span class="text-xs md:text-sm text-gray-400 w-1/3 md:w-1/4 whitespace-nowrap overflow-hidden text-ellipsis">${escapeHtml(chapter.chapterId)} ${escapeHtml(chapter.chapterName)}</span>
-                            <div class="flex-grow mx-2">
-                                <div class="mastery-bar-outer h-3 bg-gray-700">
+                        <div class="mb-4 p-2 bg-[#2a2a44] rounded-lg border border-cyan-500/10">
+                            <!-- 章節名稱/代碼 (第一行) -->
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-sm font-semibold text-gray-200">${escapeHtml(chapter.chapterId)} ${escapeHtml(chapter.chapterName)}</span>
+                                <span class="text-xs ${textColorClass}">${percentage}%</span>
+                            </div>
+                            <!-- 長條圖 (第二行) -->
+                            <div class="flex items-center">
+                                <div class="mastery-bar-outer flex-grow h-3 bg-gray-700">
                                     <div class="mastery-bar-inner ${colorClass}" style="${widthStyle}"></div>
                                 </div>
                             </div>
-                            <span class="text-sm font-bold ${textColorClass} w-10 text-right">${percentage}%</span>
                         </div>
                     `;
                 }).join('');
@@ -772,30 +775,30 @@
 
                     return `
                         <div class="mb-4 futuristic-card p-0 shadow-none border-none">
-                            <!-- 頂層可點擊區域 -->
-                            <div id="header-${compId}" class="flex justify-between items-center p-4 cursor-pointer accordion-header hover:bg-gray-700 rounded-lg shadow-md border-b-2 border-cyan-500/10" data-comp-name="${escapeHtml(comp.compName)}">
-                                <div class="flex items-center w-2/5 md:w-1/3 min-w-[150px]">
+                            <!-- 頂層可點擊區域 (Header) -->
+                            <div id="header-${compId}" class="p-4 cursor-pointer accordion-header hover:bg-gray-700 rounded-lg shadow-md border-b-2 border-cyan-500/10" data-comp-name="${escapeHtml(comp.compName)}">
+                                
+                                <!-- 修正：能力名稱 (第一行) -->
+                                <div class="flex items-center mb-2">
                                     ${compIcon}
-                                    <!-- 修正：手機上能力名稱使用 text-sm 減少裁切 -->
-                                    <h3 class="text-sm md:text-base font-bold text-gray-200 whitespace-nowrap overflow-hidden text-ellipsis">
-                                        ${escapeHtml(comp.compName)}
-                                    </h3>
+                                    <h3 class="text-base font-bold text-gray-200">${escapeHtml(comp.compName)}</h3>
                                 </div>
-                                <div class="flex-grow mx-2 min-w-[100px]"> <!-- 確保長條圖有最小寬度 -->
-                                    <div class="mastery-bar-outer bg-gray-700">
+
+                                <!-- 修正：長條圖與百分比 (第二行) -->
+                                <div class="flex items-center justify-between">
+                                    <div class="mastery-bar-outer flex-grow mr-4 bg-gray-700"> 
                                         <div class="mastery-bar-inner ${colorClass}" style="${widthStyle}"></div>
                                     </div>
-                                </div>
-                                <div class="flex items-center w-1/5 md:w-1/6 justify-end">
-                                    <span class="text-xl font-extrabold ${textColorClass}">${percentage}%</span>
-                                    <svg id="icon-${compId}" class="w-5 h-5 ml-2 text-cyan-400 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                    <span class="text-xl font-extrabold ${textColorClass} mr-2">${percentage}%</span>
+                                    <svg id="icon-${compId}" class="w-5 h-5 text-cyan-400 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                                 </div>
                             </div>
 
                             <!-- 展開內容 (Accordion Content) -->
                             <div id="content-${compId}" class="accordion-content">
                                 <div class="p-4 pt-0 mt-2">
-                                    <p class="text-sm font-semibold text-gray-300 mb-3">細項章節掌握百分比 (補強優先級：由上至下)</p>
+                                    <!-- 修正：涵蓋之章節掌握百分比 -->
+                                    <p class="text-sm font-semibold text-gray-300 mb-3">涵蓋之章節掌握百分比</p>
                                     ${chapterDetailHtml}
                                 </div>
                             </div>
