@@ -26,8 +26,8 @@
             background-color: #130E20; /* 深紫色/深藍色背景 */
             color: #E0E0E0; /* 淺色字體，高對比 */
             background-attachment: fixed;
-            /* 修正：使用 6rem 確保有足夠的空間避開 Header */
-            padding-top: 6rem; 
+            /* 最終修正：增加 padding-top 到 6.5rem，確保內容不被 Header 遮擋 */
+            padding-top: 6.5rem; 
         }
 
         /* 固定頂部 Header 樣式 (高度縮小) */
@@ -36,7 +36,7 @@
             top: 0;
             left: 0;
             width: 100%;
-            z-index: 50;
+            z-index: 1000; /* 提高 Z-index 權重 */
             background-color: #130E20; 
             border-bottom: 1px solid rgba(0, 255, 255, 0.1); /* 邊框變細 */
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
@@ -145,6 +145,23 @@
         .career-item-label {
             white-space: nowrap;
             flex-shrink: 0;
+        }
+        
+        /* Loading Spinner 樣式 */
+        .spinner {
+            border: 8px solid #2a2a44; /* Light grey */
+            border-top: 8px solid #00FFFF; /* Neon Cyan */
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1.5s linear infinite;
+            margin: 0 auto;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -462,8 +479,8 @@
                 content.innerHTML = `
                     <div class="futuristic-card question-block p-6 md:p-8" data-original-index="${originalIndex}">
                         <div class="flex justify-between items-center mb-4">
-                            <!-- 修正：任務進度旁加入白色題數顯示 -->
-                            <span class="text-sm font-semibold text-orange-400">
+                            <!-- 修正：任務進度下移，避免被 Header 遮擋 -->
+                            <span class="text-sm font-semibold text-orange-400 mt-2">
                                 任務進度 
                                 <span class="text-gray-200 ml-1">(${currentNumber} / ${totalQuestions} 題)</span>
                             </span>
@@ -531,7 +548,8 @@
                     quizState.currentIndex++;
                     renderQuizScreen();
                 } else {
-                    calculateResults();
+                    // *** 關鍵修改：進入 Loading 畫面 ***
+                    renderLoadingScreen();
                 }
                 
                 // *** 修正：使用即時跳轉，提高穩定性 ***
@@ -541,6 +559,45 @@
                 displayError("處理下一題錯誤", e.message);
             }
         }
+
+        /**
+         * 渲染 Loading 讀取畫面
+         */
+        function renderLoadingScreen() {
+             try {
+                const content = document.getElementById(CONTENT_ID);
+                if (!content) throw new Error("Content container not found.");
+                
+                // 隨機延遲時間 (3000ms 到 5000ms)
+                const minDelay = 3000;
+                const maxDelay = 5000;
+                const randomDelay = Math.floor(Math.random() * (maxDelay - minDelay + 1)) + minDelay;
+
+                content.innerHTML = `
+                    <div class="futuristic-card text-center p-12 h-96 flex flex-col items-center justify-center">
+                        <div class="spinner mb-8"></div>
+                        <h2 class="text-2xl font-bold text-cyan-400 mb-2 shadow-neon-cyan">
+                            數據矩陣分析中...
+                        </h2>
+                        <p class="text-sm text-gray-400">
+                            正在解析您的潛能指標，請稍候。
+                        </p>
+                        <p class="text-xs text-gray-600 mt-6">
+                            預計延遲：${(randomDelay / 1000).toFixed(1)} 秒
+                        </p>
+                    </div>
+                `;
+
+                // 設置延遲，延遲結束後呼叫真正的結果計算
+                setTimeout(() => {
+                    calculateResults();
+                }, randomDelay);
+
+            } catch (e) {
+                displayError("渲染 Loading 畫面錯誤", e.message);
+            }
+        }
+
 
         /**
          * 計算並顯示測驗結果
@@ -810,24 +867,49 @@
                 
                 // 新增就業方向說明 HTML (已優化排版)
                 const careerGuidanceHtml = `
-                    <ul class="text-sm text-gray-300 space-y-2 mb-4">
-                        <li class="career-item-text">
-                            <span class="text-cyan-400 font-bold mr-2 flex-shrink-0 whitespace-nowrap">1. 洞察市場與消費者：</span>
-                            <span class="flex-grow">收集並分析市場資料、競爭者動向與消費者行為，作為策略規劃的基礎。</span>
+                    <ul class="text-sm text-gray-300 space-y-3 mb-4">
+                        <li class="flex flex-col items-start">
+                            <span class="text-cyan-400 font-bold mb-1">1. 洞察市場與消費者：</span>
+                            <span class="text-gray-300">收集並分析市場資料、競爭者動向與消費者行為，作為策略規劃的基礎。</span>
                         </li>
-                        <li class="career-item-text">
-                            <span class="text-cyan-400 font-bold mr-2 flex-shrink-0 whitespace-nowrap">2. 擬定行銷策略：</span>
-                            <span class="flex-grow">根據品牌定位與目標客群設計整體行銷主軸、訊息架構與溝通方式。</span>
+                        <li class="flex flex-col items-start">
+                            <span class="text-cyan-400 font-bold mb-1">2. 擬定行銷策略：</span>
+                            <span class="text-gray-300">根據品牌定位與目標客群設計整體行銷主軸、訊息架構與溝通方式。</span>
                         </li>
-                        <li class="career-item-text">
-                            <span class="text-cyan-400 font-bold mr-2 flex-shrink-0 whitespace-nowrap">3. 設計行銷活動內容：</span>
-                            <span class="flex-grow">策劃活動主題、內容素材與通路策略，提升消費者接觸與參與。</span>
+                        <li class="flex flex-col items-start">
+                            <span class="text-cyan-400 font-bold mb-1">3. 設計行銷活動內容：</span>
+                            <span class="text-gray-300">策劃活動主題、內容素材與通路策略，提升消費者接觸與參與。</span>
                         </li>
-                        <li class="career-item-text">
-                            <span class="text-cyan-400 font-bold mr-2 flex-shrink-0 whitespace-nowrap">4. 評估績效並調整：</span>
-                            <span class="flex-grow">檢視KPI達成率，從數據中找出問題點並提出修正建議。</span>
+                        <li class="flex flex-col items-start">
+                            <span class="text-cyan-400 font-bold mb-1">4. 評估績效並調整：</span>
+                            <span class="text-gray-300">檢視KPI達成率，從數據中找出問題點並提出修正建議。</span>
                         </li>
                     </ul>
+                `;
+                
+                // 修正掌握度說明格式
+                const masteryLegendHtml = `
+                    <div class="mb-4 text-sm text-gray-300 space-y-2">
+                        <p>
+                            <span class="font-bold text-lime-400">💡 掌握度高：</span><br>
+                            代表您的直覺觀點與該章節的核心概念高度契合，未來閱讀教材時會有更強的「共鳴感」與「回饋感」。
+                        </p>
+                        <p>
+                            <span class="font-bold text-red-500">📉 掌握度低：</span><br>
+                            這可能代表您的既有觀念與該章節的知識點存在落差，是您準備認證考試時，最需要加強複習和避免「快速遺忘」的領域！
+                        </p>
+                    </div>
+                `;
+                
+                // 修正學習建議格式
+                const learningAdviceHtml = `
+                    <div class="text-sm text-orange-400 mb-3 border-b border-gray-800 pb-2 flex items-start">
+                        <svg class="w-4 h-4 mr-1 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        <div>
+                            <span class="font-bold">學習建議：</span><br>
+                            <span>雖然以下章節依「掌握度百分比」由低至高排列，但仍建議您按照<span class="text-cyan-400 font-bold">CH1 → CH10</span>的順序閱讀，可更完整建立學習脈絡與邏輯架構。</span>
+                        </div>
+                    </div>
                 `;
 
 
@@ -845,36 +927,26 @@
                             <p class="text-gray-500 mt-2">（滿分 100 分）</p>
                         </div>
 
-                        <!-- 調整後的：各領域掌握度分析 (整體章節補強優先級) - 恢復穩定樣式 -->
+                        <!-- 調整後的：各領域掌握度分析 (整體章節補強優先級) - 新增青色光暈 -->
                         <div class="text-left mb-8 p-4 bg-[#1a1a2e] rounded-xl border border-cyan-500/20 shadow-neon-cyan">
                             <!-- 標題強化 (已收斂光暈) -->
                             <h2 class="text-xl md:text-2xl font-extrabold text-cyan-400 mb-4 pb-2 title-glow flex items-center">
                                 <svg class="w-6 h-6 mr-2 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19C7.794 19 7 18.206 7 17s.794-2 2-2 2 .794 2 2-.794 2-2 2zM21 16c1.206 0 2 .794 2 2s-.794 2-2 2-2-.794-2-2 .794-2 2-2zM9 19V6l12-3v13"></path></svg>
                                 各領域掌握度分析
                             </h2>
-                            <!-- 核心說明 -->
-                            <div class="mb-4 text-sm text-gray-300">
-                                <p class="mb-1">
-                                    <span class="font-bold text-lime-400">💡 掌握度高</span>：代表您的直覺觀點與該章節的核心概念高度契合，未來閱讀教材時會有更強的「共鳴感」與「回饋感」。
-                                </p>
-                                <p class="mt-1">
-                                    <span class="font-bold text-red-500">📉 掌握度低</span>：這可能代表您的既有觀念與該章節的知識點存在落差，是您準備認證考試時，最需要加強複習和避免「快速遺忘」的領域！
-                                </p>
-                            </div>
-                            <!-- 修正說明文字 -->
-                            <div class="text-sm text-orange-400 mb-3 border-b border-gray-800 pb-2 flex items-start">
-                                <svg class="w-4 h-4 mr-1 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                <div>
-                                    <span class="font-bold">學習建議：</span>
-                                    <span>雖然以下章節依「掌握度百分比」由低至高排列，但仍建議您按照<span class="text-cyan-400 font-bold">CH1 → CH10</span>的順序閱讀，可更完整建立學習脈絡與邏輯架構。</span>
-                                </div>
-                            </div>
+                            
+                            <!-- 核心說明 (已修正排版) -->
+                            ${masteryLegendHtml}
+
+                            <!-- 修正說明文字 (已修正排版) -->
+                            ${learningAdviceHtml}
+                            
                             ${chapterOverviewHtml}
                         </div>
                         <!-- END OF 各領域掌握度分析 -->
 
 
-                        <!-- 四大能力分類區塊 (已改名) - 恢復穩定樣式 -->
+                        <!-- 四大能力分類區塊 (已改名) - 新增青色光暈 -->
                         <div class="text-left mb-8 p-4 bg-[#1a1a2e] rounded-xl border border-cyan-500/20 shadow-neon-cyan">
                             <!-- 標題強化 (已收斂光暈) -->
                             <h2 class="text-xl md:text-2xl font-extrabold text-cyan-400 mb-4 pb-2 title-glow flex items-center">
