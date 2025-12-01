@@ -343,16 +343,17 @@
                 content.innerHTML = `
                     <div class="futuristic-card text-center p-8">
                         
-                        <!-- 移除中間的首頁圖片 <img> -->
-
-                        <!-- 修正：潛能 -> 天分 -->
-                        <p class="text-lg text-gray-300 mb-6">台灣行銷科學學會 - 你的行銷天分探索之旅</p>
+                        <!-- 修正：品牌標語分行顯示 -->
+                        <p class="text-lg text-gray-300 mb-6">
+                            <span class="block text-xl font-bold text-cyan-400 mb-1">台灣行銷科學學會</span> 
+                            <span class="block text-base">你的行銷天分探索之旅</span>
+                        </p>
 
                         <div class="text-left bg-[#130E20] p-6 rounded-xl mb-8 border border-cyan-500/20 shadow-neon-cyan">
-                            <!-- 增加字體大小/間距 -->
+                            <!-- 修正：指南標題精簡 -->
                             <p class="font-semibold text-orange-400 mb-4 flex items-center text-lg">
                                 ${GuideIcon}
-                                測驗指南 - 尋找你的原始天分
+                                測驗指南
                             </p>
                             <!-- 優化清單排版 -->
                             <ul class="text-sm text-gray-300 space-y-4 ml-2"> 
@@ -710,6 +711,7 @@
                     const widthStyle = `width: ${Math.max(0, percentage)}%;`;
 
                     return `
+                        <!-- 修正：將所有章節掌握度區塊恢復到最穩定的樣式 (無特殊光暈) -->
                         <div class="mb-4 p-2 bg-[#2a2a44] rounded-lg border border-cyan-500/10">
                             <!-- 章節名稱/代碼 (第一行) -->
                             <div class="flex justify-between items-center mb-1">
@@ -834,7 +836,7 @@
                         <!-- 修正：手機上字體使用 text-xl 確保不換行 -->
                         <h1 class="text-xl font-bold text-orange-400 mb-6 border-b border-cyan-500/30 pb-2">:: 測驗結果分析報告 ::</h1>
                         
-                        <!-- 總分區塊 -->
+                        <!-- 總分區塊 (保留青色光暈) -->
                         <div class="bg-[#130E20] p-6 rounded-xl mb-8 border border-cyan-500/20 shadow-neon-cyan">
                             <p class="text-lg text-cyan-400 mb-2">您的行銷天分值：</p>
                             <div class="flex items-center justify-center">
@@ -843,8 +845,8 @@
                             <p class="text-gray-500 mt-2">（滿分 100 分）</p>
                         </div>
 
-                        <!-- 調整後的：各領域掌握度分析 (整體章節補強優先級) -->
-                        <div class="text-left mb-8 p-4 bg-[#1a1a2e] rounded-xl border border-cyan-500/10 shadow-lg">
+                        <!-- 調整後的：各領域掌握度分析 (整體章節補強優先級) - 新增青色光暈 -->
+                        <div class="text-left mb-8 p-4 bg-[#1a1a2e] rounded-xl border border-cyan-500/20 shadow-neon-cyan">
                             <!-- 標題強化 (已收斂光暈) -->
                             <h2 class="text-xl md:text-2xl font-extrabold text-cyan-400 mb-4 pb-2 title-glow flex items-center">
                                 <svg class="w-6 h-6 mr-2 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19C7.794 19 7 18.206 7 17s.794-2 2-2 2 .794 2 2-.794 2-2 2zM21 16c1.206 0 2 .794 2 2s-.794 2-2 2-2-.794-2-2 .794-2 2-2zM9 19V6l12-3v13"></path></svg>
@@ -872,8 +874,8 @@
                         <!-- END OF 各領域掌握度分析 -->
 
 
-                        <!-- 四大能力分類區塊 (已改名) -->
-                        <div class="text-left mb-8">
+                        <!-- 四大能力分類區塊 (已改名) - 新增青色光暈 -->
+                        <div class="text-left mb-8 p-4 bg-[#1a1a2e] rounded-xl border border-cyan-500/20 shadow-neon-cyan">
                             <!-- 標題強化 (已收斂光暈) -->
                             <h2 class="text-xl md:text-2xl font-extrabold text-cyan-400 mb-4 pb-2 title-glow flex items-center">
                                 <svg class="w-6 h-6 mr-2 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
