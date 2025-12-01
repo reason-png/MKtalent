@@ -15,7 +15,7 @@
         }
         /* 標題文字強調光暈 (已收斂) */
         .title-glow {
-            text-shadow: 0 0 3px rgba(0, 255, 255, 0.3), 0 0 6px rgba(0, 255, 255, 0.1);
+            text-shadow: 0 0 1px rgba(0, 255, 255, 0.2), 0 0 4px rgba(0, 255, 255, 0.05);
         }
 
         /* ----------------------- */
@@ -26,10 +26,11 @@
             background-color: #130E20; /* 深紫色/深藍色背景 */
             color: #E0E0E0; /* 淺色字體，高對比 */
             background-attachment: fixed;
-            padding-top: 4.5rem; /* 為固定頂部 Header 騰出空間 */
+            /* 修正：使用 6rem 確保有足夠的空間避開 Header */
+            padding-top: 6rem; 
         }
 
-        /* 固定頂部 Header 樣式 (簡化置中邏輯) */
+        /* 固定頂部 Header 樣式 (高度縮小) */
         #main-header {
             position: fixed;
             top: 0;
@@ -37,9 +38,9 @@
             width: 100%;
             z-index: 50;
             background-color: #130E20; 
-            border-bottom: 2px solid rgba(0, 255, 255, 0.1);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-            padding: 0.5rem 0; /* 再次縮小 padding */
+            border-bottom: 1px solid rgba(0, 255, 255, 0.1); /* 邊框變細 */
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+            padding: 0.25rem 0; /* 減少垂直 Padding */
         }
         
         .futuristic-card {
@@ -95,8 +96,8 @@
 
         /* 進度條與圖表 */
         .progress-bar-container {
-            height: 12px;
-            border-radius: 6px;
+            height: 8px; /* 進度條稍微變細 */
+            border-radius: 4px;
             background-color: #2a2a44;
             overflow: hidden;
             border: 1px solid #00FFFF;
@@ -132,18 +133,11 @@
         /* LOGO 專屬光暈與浮動效果 (收斂光暈) */
         .logo-glow {
             /* 調整光暈半徑，使其更集中 */
-            filter: drop-shadow(0 0 3px rgba(0, 255, 255, 0.7)) drop-shadow(0 0 8px rgba(0, 255, 255, 0.1));
+            filter: drop-shadow(0 0 2px rgba(0, 255, 255, 0.7)) drop-shadow(0 0 5px rgba(0, 255, 255, 0.1));
         }
 
-        /* 圖片載入平滑淡入效果 */
-        .image-transition {
-            opacity: 0;
-            transition: opacity 0.5s ease-in;
-        }
-        .image-transition.loaded {
-            opacity: 1;
-        }
-        /* 就業方向說明單行顯示，不允許換行 */
+        /* 圖片載入平滑淡入效果 (已移除) */
+        /* 就業方向說明單行顯示 */
         .career-item-text {
             display: flex;
             align-items: flex-start;
@@ -151,34 +145,33 @@
         .career-item-label {
             white-space: nowrap;
             flex-shrink: 0;
-            width: 140px; /* 給予足夠寬度 */
         }
     </style>
 </head>
 <body class="p-4 md:p-8 min-h-screen flex items-start justify-center">
 
-    <!-- 新增固定頂部 Header 區塊 (已修正尺寸與對齊) -->
+    <!-- 新增固定頂部 Header 區塊 (已縮小尺寸) -->
     <header id="main-header" class="px-4 md:px-8">
         <!-- 容器置中 -->
-        <div class="flex items-center justify-center max-w-2xl mx-auto">
-            <!-- Logo 尺寸：32px -->
-            <img src="https://i.postimg.cc/7Ly3JFYs/TIMS-Logo-png.png" alt="台灣行銷科學學會 Logo" class="max-w-[32px] h-auto object-contain logo-glow transition-transform duration-500 mr-2">
+        <div class="flex items-center justify-center max-w-2xl mx-auto h-full">
+            <!-- Logo 尺寸縮小至 24px -->
+            <img src="https://i.postimg.cc/7Ly3JFYs/TIMS-Logo-png.png" alt="台灣行銷科學學會 Logo" class="max-w-[24px] h-auto object-contain logo-glow transition-transform duration-500 mr-2">
             
-            <div class="flex flex-col items-start leading-none">
-                <!-- 中文標題放大 (text-lg md:text-xl) -->
-                <h1 class="text-lg md:text-xl font-extrabold text-cyan-400 whitespace-nowrap">TIMS行銷天分測評</h1>
-                <!-- 英文副標題縮小 -->
-                <p class="text-xs font-light text-gray-400 mt-0.5 whitespace-nowrap">:: Marketing Talent Assessment ::</p>
+            <div class="flex flex-col items-start leading-none justify-center">
+                <!-- 中文標題縮小為 text-base (約16px) -->
+                <h1 class="text-base md:text-lg font-extrabold text-cyan-400 whitespace-nowrap tracking-wide">TIMS行銷天分測評</h1>
+                <!-- 英文副標題縮小為 10px -->
+                <p class="text-[10px] font-light text-gray-400 mt-0.5 whitespace-nowrap tracking-wider">:: Marketing Talent Assessment ::</p>
             </div>
         </div>
     </header>
 
-    <div id="content" class="w-full max-w-2xl mt-8">
+    <div id="content" class="w-full max-w-2xl">
         <!-- 應用程式內容將動態載入此處 --></div>
 
     <script>
         // ----------------------------------------------------
-        // 核心題庫資料 (共 25 題) - 已替換為最新且完整的題目列表
+        // 核心題庫資料 (共 25 題)
         // ----------------------------------------------------
         const QUIZ_DATA = [
             { chapterId: "CH1", chapterName: "行銷源典", question: "你如何看待「買一送一」的促銷優惠所帶來的營收增長？", imageUrl: "https://i.postimg.cc/fLGwYWL8/wei-ming-ming-1.jpg", options: [{ text: "這是暫時的手段，顧客是否還願意回購才是真正的關鍵。", score: 4 }, { text: "有效的短期戰術，創造消費者願意支付的價值。", score: 2 }, { text: "這是必要的價格讓利，能確最短時間內創造大量營收。", score: 1 }] },
@@ -330,32 +323,12 @@
                 if (nextButton) {
                     nextButton.disabled = false;
                 }
-                
-                // *** 圖片載入優化: 預先載入下一張圖片 ***
-                preloadNextImage();
 
             } catch (e) {
                 displayError("選項點擊處理錯誤", e.message);
             }
         }
         
-        /**
-         * 預先載入下一張圖片
-         */
-        function preloadNextImage() {
-            const nextIndexInCurrentQuiz = quizState.currentIndex + 1;
-            if (nextIndexInCurrentQuiz < quizState.currentQuiz.length) {
-                const nextQuestion = quizState.currentQuiz[nextIndexInCurrentQuiz];
-                const nextImageUrl = nextQuestion.imageUrl;
-                
-                if (nextImageUrl) {
-                    const img = new Image();
-                    img.src = nextImageUrl;
-                    // console.log(`Preloading image for Q${nextIndexInCurrentQuiz + 1}: ${nextImageUrl}`); // 輔助除錯
-                }
-            }
-        }
-
         /**
          * 渲染開始畫面
          */
@@ -368,7 +341,7 @@
                 const GuideIcon = `<svg class="w-5 h-5 mr-2 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2h10a2 2 0 012 2v2m-7-7V3"></path></svg>`; // 數據板/晶片
 
                 content.innerHTML = `
-                    <div class="futuristic-card text-center p-8 mt-2">
+                    <div class="futuristic-card text-center p-8">
                         
                         <!-- 移除中間的首頁圖片 <img> -->
 
@@ -388,7 +361,7 @@
                                     <div class="flex-1">
                                         <span class="text-cyan-400 font-bold text-lg">探索天分：</span> 
                                         <!-- 修正：內文替換為最新的需求 -->
-                                        <div class="mt-1">透過這25測評，我們將量化你的<span class="text-orange-400 font-bold">行銷天分值</span>，並轉換為未來職涯方向的建議。</div>
+                                        <div class="mt-1 text-gray-300">透過這 25 測評，我們將量化你的<span class="text-orange-400 font-bold">行銷天分值</span>，並轉換為未來職涯方向的建議。</div>
                                     </div>
                                 </li>
                                 <li class="flex items-start">
@@ -409,7 +382,7 @@
                                         <!-- 修正：標題替換 -->
                                         <span class="text-cyan-400 font-bold text-lg">認證前哨戰：</span> 
                                         <!-- 修正：內文替換 -->
-                                        <div class="mt-1">讓你精準了解哪個章節是你的天生強項，哪個章節又是補強重點！</div>
+                                        <div class="mt-1 text-gray-300">讓你精準了解哪個章節是你的天生強項，哪個章節又是補強重點！</div>
                                     </div>
                                 </li>
                             </ul>
@@ -499,17 +472,16 @@
                             <div class="progress-bar" style="width: ${progress.toFixed(2)}%;"></div>
                         </div>
 
-                        <h2 class="text-xl font-bold text-gray-200 mb-6">Q${currentNumber}. ${escapeHtml(currentItem.question)}</h2>
+                        <!-- 修正：題目使用 text-amber-300 呈現 -->
+                        <h2 class="text-xl font-bold text-amber-300 mb-6">Q${currentNumber}. ${escapeHtml(currentItem.question)}</h2>
 
-                        <!-- 題目圖片顯示區塊 (放在題目與選項之間) -->
+                        <!-- 題目圖片顯示區塊 (已移除圖片優化邏輯) -->
                         <div class="mb-6 text-center">
-                            <!-- 圖片優化: Lazy Loading + 淡入效果 -->
                             <img 
                                 id="current-quiz-image"
                                 src="${imageUrl}" 
                                 alt="題目示意圖" 
-                                class="w-full h-auto object-contain rounded-lg shadow-lg shadow-cyan-500/20 image-transition"
-                                loading="lazy" 
+                                class="w-full h-auto object-contain rounded-lg shadow-lg shadow-cyan-500/20"
                                 onerror="this.onerror=null; this.src='https://placehold.co/600x300/e0e0e0/505050?text=Image+Load+Error';"
                             >
                         </div>
@@ -528,14 +500,6 @@
                 `;
                  document.getElementById(NEXT_BUTTON_ID).addEventListener('click', nextQuestion);
                  
-                 // 圖片載入完成後增加 loaded class，觸發淡入效果
-                 const imgElement = document.getElementById('current-quiz-image');
-                 if (imgElement) {
-                     imgElement.onload = () => imgElement.classList.add('loaded');
-                     // 如果圖片已在快取中，手動觸發 loaded
-                     if (imgElement.complete) imgElement.classList.add('loaded');
-                 }
-
             } catch (e) {
                 displayError("渲染測驗畫面錯誤", e.message);
             }
@@ -569,11 +533,8 @@
                     calculateResults();
                 }
                 
-                // *** 新增：點擊下一題後，網頁自動捲動到頂部 ***
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-
-                // *** 圖片載入優化: 預先載入下一張圖片 (在點擊下一題時觸發) ***
-                preloadNextImage();
+                // *** 修正：使用即時跳轉，提高穩定性 ***
+                window.scrollTo(0, 0);
 
             } catch (e) {
                 displayError("處理下一題錯誤", e.message);
@@ -685,8 +646,8 @@
 
                 renderResultScreen(results);
                 
-                // *** 新增：查看結果後，網頁自動捲動到頂部 ***
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                // *** 修正：使用即時跳轉，提高穩定性 ***
+                window.scrollTo(0, 0);
 
             } catch (e) {
                 displayError("計算結果錯誤", e.message);
@@ -750,7 +711,8 @@
 
                     return `
                         <div class="flex items-center mb-2">
-                            <span class="text-sm text-gray-400 w-1/3 md:w-1/4 whitespace-nowrap overflow-hidden text-ellipsis">${escapeHtml(chapter.chapterId)} ${escapeHtml(chapter.chapterName)}</span>
+                            <!-- 修正：手機上章節名稱使用 text-xs 減少裁切 -->
+                            <span class="text-xs md:text-sm text-gray-400 w-1/3 md:w-1/4 whitespace-nowrap overflow-hidden text-ellipsis">${escapeHtml(chapter.chapterId)} ${escapeHtml(chapter.chapterName)}</span>
                             <div class="flex-grow mx-2">
                                 <div class="mastery-bar-outer h-3 bg-gray-700">
                                     <div class="mastery-bar-inner ${colorClass}" style="${widthStyle}"></div>
@@ -814,6 +776,7 @@
                             <div id="header-${compId}" class="flex justify-between items-center p-4 cursor-pointer accordion-header hover:bg-gray-700 rounded-lg shadow-md border-b-2 border-cyan-500/10" data-comp-name="${escapeHtml(comp.compName)}">
                                 <div class="flex items-center w-2/5 md:w-1/3 min-w-[150px]">
                                     ${compIcon}
+                                    <!-- 修正：手機上能力名稱使用 text-sm 減少裁切 -->
                                     <h3 class="text-sm md:text-base font-bold text-gray-200 whitespace-nowrap overflow-hidden text-ellipsis">
                                         ${escapeHtml(comp.compName)}
                                     </h3>
@@ -844,19 +807,19 @@
                 const careerGuidanceHtml = `
                     <ul class="text-sm text-gray-300 space-y-2 mb-4">
                         <li class="career-item-text">
-                            <span class="text-cyan-400 font-bold mr-2 career-item-label">1. 洞察市場與消費者：</span>
+                            <span class="text-cyan-400 font-bold mr-2 flex-shrink-0 whitespace-nowrap">1. 洞察市場與消費者：</span>
                             <span class="flex-grow">收集並分析市場資料、競爭者動向與消費者行為，作為策略規劃的基礎。</span>
                         </li>
                         <li class="career-item-text">
-                            <span class="text-cyan-400 font-bold mr-2 career-item-label">2. 擬定行銷策略：</span>
+                            <span class="text-cyan-400 font-bold mr-2 flex-shrink-0 whitespace-nowrap">2. 擬定行銷策略：</span>
                             <span class="flex-grow">根據品牌定位與目標客群設計整體行銷主軸、訊息架構與溝通方式。</span>
                         </li>
                         <li class="career-item-text">
-                            <span class="text-cyan-400 font-bold mr-2 career-item-label">3. 設計行銷活動內容：</span>
+                            <span class="text-cyan-400 font-bold mr-2 flex-shrink-0 whitespace-nowrap">3. 設計行銷活動內容：</span>
                             <span class="flex-grow">策劃活動主題、內容素材與通路策略，提升消費者接觸與參與。</span>
                         </li>
                         <li class="career-item-text">
-                            <span class="text-cyan-400 font-bold mr-2 career-item-label">4. 評估績效並調整：</span>
+                            <span class="text-cyan-400 font-bold mr-2 flex-shrink-0 whitespace-nowrap">4. 評估績效並調整：</span>
                             <span class="flex-grow">檢視KPI達成率，從數據中找出問題點並提出修正建議。</span>
                         </li>
                     </ul>
@@ -865,13 +828,13 @@
 
                 content.innerHTML = `
                     <div class="futuristic-card text-center p-8">
-                        <h1 class="text-3xl font-bold text-orange-400 mb-6 border-b border-cyan-500/30 pb-2">:: 測驗結果分析報告 ::</h1>
+                        <!-- 修正：手機上字體使用 text-xl 確保不換行 -->
+                        <h1 class="text-xl font-bold text-orange-400 mb-6 border-b border-cyan-500/30 pb-2">:: 測驗結果分析報告 ::</h1>
                         
                         <!-- 總分區塊 -->
                         <div class="bg-[#130E20] p-6 rounded-xl mb-8 border border-cyan-500/20 shadow-neon-cyan">
                             <p class="text-lg text-cyan-400 mb-2">您的行銷天分值：</p>
                             <div class="flex items-center justify-center">
-                                <!-- 移除 iconSvg，只保留分數 -->
                                 <p class="text-6xl font-extrabold ${scoreTextClass}">${results.totalScore}</p>
                             </div>
                             <p class="text-gray-500 mt-2">（滿分 100 分）</p>
@@ -879,7 +842,7 @@
 
                         <!-- 調整後的：各領域掌握度分析 (整體章節補強優先級) -->
                         <div class="text-left mb-8 p-4 bg-[#1a1a2e] rounded-xl border border-cyan-500/10 shadow-lg">
-                            <!-- 標題強化 -->
+                            <!-- 標題強化 (已收斂光暈) -->
                             <h2 class="text-xl md:text-2xl font-extrabold text-cyan-400 mb-4 pb-2 title-glow flex items-center">
                                 <svg class="w-6 h-6 mr-2 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19C7.794 19 7 18.206 7 17s.794-2 2-2 2 .794 2 2-.794 2-2 2zM21 16c1.206 0 2 .794 2 2s-.794 2-2 2-2-.794-2-2 .794-2 2-2zM9 19V6l12-3v13"></path></svg>
                                 各領域掌握度分析
@@ -908,7 +871,7 @@
 
                         <!-- 四大能力分類區塊 (已改名) -->
                         <div class="text-left mb-8">
-                            <!-- 標題強化 -->
+                            <!-- 標題強化 (已收斂光暈) -->
                             <h2 class="text-xl md:text-2xl font-extrabold text-cyan-400 mb-4 pb-2 title-glow flex items-center">
                                 <svg class="w-6 h-6 mr-2 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
                                 行銷企劃就業方向
@@ -953,7 +916,7 @@
         function initApp() {
             try {
                 const content = document.getElementById(CONTENT_ID);
-                if (!content) throw new Error("Content container not found on initialization.");
+                if (!content) throw new Error("Content container not found.");
                 
                 // 設定 Event Delegation: 監聽整個內容區域的點擊事件 (用於選項)
                 content.addEventListener('click', (event) => {
