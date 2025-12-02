@@ -26,13 +26,17 @@
             background-color: #130E20; /* 深紫色/深藍色背景 */
             color: #E0E0E0; /* 淺色字體，高對比 */
             background-attachment: fixed;
-            /* 修正：移除 padding-top，由 static Header 和 content margin 控制空間 */
+            /* 修正：精確計算 Header 高度 (約 5rem)，確保內容不被遮擋 */
+            padding-top: 5rem; 
+            /* 移除 body 預設邊距，改由內層 card 控制 */
             margin: 0;
             padding: 0;
         }
 
-        /* Header 樣式 (改為 Static，由正常文件流控制) */
+        /* Header 樣式 (改為 Sticky 定位) */
         #main-header {
+            position: sticky;
+            top: 0; /* 吸附在頂部 */
             width: 100%;
             z-index: 1000; 
             background-color: #130E20; 
@@ -48,6 +52,22 @@
             border: 1px solid rgba(0, 255, 255, 0.1); /* 柔和青色邊框 */
             padding: 2rem;
             transition: all 0.3s ease;
+        }
+        
+        /* 新增輸入框樣式 */
+        .futuristic-input {
+            background-color: #130E20;
+            border: 1px solid #00FFFF;
+            color: #00FFFF;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            width: 100%;
+            transition: all 0.3s;
+        }
+        .futuristic-input:focus {
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+            border-color: #00FFFF;
         }
 
         .futuristic-button {
@@ -165,7 +185,7 @@
 </head>
 <body class="min-h-screen flex flex-col items-center">
 
-    <!-- Header 恢復為標準文件流 DIV (Static) -->
+    <!-- Header 恢復為 Sticky 定位 -->
     <header id="main-header" class="px-4 md:px-8">
         <!-- 容器置中 -->
         <div class="flex items-center justify-center max-w-2xl mx-auto h-full">
@@ -173,8 +193,8 @@
             <img src="https://i.postimg.cc/7Ly3JFYs/TIMS-Logo-png.png" alt="台灣行銷科學學會 Logo" class="max-w-[24px] h-auto object-contain logo-glow transition-transform duration-500 mr-2">
             
             <div class="flex flex-col items-start leading-none justify-center">
-                <!-- 中文標題縮小為 text-base (約16px) -->
-                <h1 class="text-base md:text-lg font-extrabold text-cyan-400 whitespace-nowrap tracking-wide">TIMS行銷天分測評</h1>
+                <!-- 修正：中文標題放大到 text-lg，與英文保持平衡對齊 -->
+                <h1 class="text-lg md:text-xl font-extrabold text-cyan-400 whitespace-nowrap tracking-wide">TIMS行銷天分測評</h1>
                 <!-- 英文副標題縮小為 10px -->
                 <p class="text-[10px] font-light text-gray-400 mt-0.5 whitespace-nowrap tracking-wider">:: Marketing Talent Assessment ::</p>
             </div>
@@ -185,6 +205,52 @@
         <!-- 應用程式內容將動態載入此處 --></div>
 
     <script>
+        // ----------------------------------------------------
+        // Google Forms 設定
+        // ----------------------------------------------------
+        // IMPORTANT: 請替換為您 Google Form 的提交 URL！
+        // 提交表單後，會被導向 Thank You 頁面，請用該頁面的 URL 替換
+        const GOOGLE_SHEETS_ENDPOINT = 'https://docs.google.com/forms/d/e/1FAIpQLSc5CAo2pEY-pdHkZeYtQ2M6cm4p-uN1RVMeTiBHEhhG0AskeA/formResponse';
+        
+        // IMPORTANT: 您提供的 Google Form Entry ID 對應表
+        const GOOGLE_FORM_ENTRIES = {
+            'userName': 'entry.1538359173',
+            'userEmail': 'entry.1736498959',
+            'totalScore': 'entry.1898927306',
+            'prValue': 'entry.986302164',
+            'comp1_Insight': 'entry.1080358045', // 洞察市場與消費者
+            'comp2_Strategy': 'entry.331054747',  // 擬定行銷策略
+            'comp3_Design': 'entry.737005771',    // 設計行銷活動內容
+            'comp4_Eval': 'entry.724149395',      // 評估績效並調整
+            'Q1_Score': 'entry.1319188217',
+            'Q2_Score': 'entry.1494380504',
+            'Q3_Score': 'entry.1749728186',
+            'Q4_Score': 'entry.1437952355',
+            'Q5_Score': 'entry.1979278572',
+            'Q6_Score': 'entry.1962531825',
+            'Q7_Score': 'entry.1923508806',
+            'Q8_Score': 'entry.719846926',
+            'Q9_Score': 'entry.1044140532',
+            'Q10_Score': 'entry.2001370142',
+            'Q11_Score': 'entry.1254892165',
+            'Q12_Score': 'entry.1880255022', 
+            'Q13_Score': 'entry.1560865525', 
+            'Q14_Score': 'entry.637078334',  
+            'Q15_Score': 'entry.582890733',  
+            'Q16_Score': 'entry.1025051972', 
+            'Q17_Score': 'entry.1574032741', 
+            'Q18_Score': 'entry.1289641297', 
+            'Q19_Score': 'entry.991719753',  
+            'Q20_Score': 'entry.60587435',   
+            'Q21_Score': 'entry.605527488',  
+            'Q22_Score': 'entry.580939618',  
+            'Q23_Score': 'entry.1251641209', 
+            'Q24_Score': 'entry.213150979',  
+            'Q25_Score': 'entry.1030397303'  
+        };
+        // ----------------------------------------------------
+
+
         // ----------------------------------------------------
         // 核心題庫資料 (共 25 題) - 已替換為最新的題目列表
         // ----------------------------------------------------
@@ -278,7 +344,9 @@
         let quizState = {
             currentQuiz: [],        // 亂數排序後的題目陣列
             currentIndex: 0,        // 當前題號索引
-            answers: new Array(QUIZ_DATA.length).fill(null) // 儲存使用者答案 (直接儲存分數 4, 2, 1)
+            answers: new Array(QUIZ_DATA.length).fill(null), // 儲存使用者答案 (直接儲存分數 4, 2, 1)
+            userName: '',           // 用戶姓名
+            userEmail: ''           // 用戶 Email
         };
 
         const CONTENT_ID = 'content';
@@ -391,6 +459,10 @@
             try {
                 const content = document.getElementById(CONTENT_ID);
                 if (!content) throw new Error("Content container not found.");
+                
+                // 清空測驗狀態，以防用戶返回重測
+                quizState.answers.fill(null); 
+                quizState.currentIndex = 0; 
 
                 // 替換圖示為「數位晶片/分析」意象
                 const GuideIcon = `<svg class="w-5 h-5 mr-2 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2h10a2 2 0 012 2v2m-7-7V3"></path></svg>`; // 數據板/晶片
@@ -403,6 +475,15 @@
                             <span class="block text-xl font-bold text-cyan-400 mb-1">台灣行銷科學學會</span> 
                             <span class="block text-base">你的行銷天分探索之旅</span>
                         </p>
+
+                        <div class="text-left mb-6">
+                            <h2 class="text-lg font-semibold text-cyan-400 mb-2">:: 資料登錄 ::</h2>
+                            <div class="space-y-3">
+                                <input type="text" id="user-name" placeholder="你的名字" class="futuristic-input" required>
+                                <input type="email" id="user-email" placeholder="聯繫 E-mail" class="futuristic-input" required>
+                                <p id="validation-message" class="text-sm text-red-500 hidden mt-2">請確認所有欄位已填寫，且 E-mail 格式正確。</p>
+                            </div>
+                        </div>
 
                         <div class="text-left bg-[#130E20] p-6 rounded-xl mb-8 border border-cyan-500/20 shadow-neon-cyan">
                             <!-- 修正：指南標題精簡 -->
@@ -417,7 +498,7 @@
                                     <div class="flex-1">
                                         <span class="text-cyan-400 font-bold text-lg">探索天分：</span> 
                                         <!-- 修正：內文替換為最新的需求 -->
-                                        <div class="mt-1 text-gray-300">透過這 25 測評，我們將量化你的<span class="text-orange-400 font-bold">行銷天分值</span>，並轉換為未來職涯方向的建議。</div>
+                                        <div class="mt-1 text-gray-300">透過 25 題測評，我們將量化你的<span class="text-orange-400 font-bold">行銷天分值</span>，並轉換為未來職涯方向的建議。</div>
                                     </div>
                                 </li>
                                 <li class="flex items-start">
@@ -452,7 +533,22 @@
                         </button>
                     </div>
                 `;
-                document.getElementById(START_BUTTON_ID).addEventListener('click', startQuiz);
+                document.getElementById(START_BUTTON_ID).addEventListener('click', () => {
+                    const name = document.getElementById('user-name').value.trim();
+                    const email = document.getElementById('user-email').value.trim();
+                    const validationMsg = document.getElementById('validation-message');
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+                    if (name === '' || !emailRegex.test(email)) {
+                        validationMsg.classList.remove('hidden');
+                    } else {
+                        validationMsg.classList.add('hidden');
+                        // 儲存用戶資料到全域狀態
+                        quizState.userName = name;
+                        quizState.userEmail = email;
+                        startQuiz();
+                    }
+                });
 
             } catch (e) {
                 displayError("渲染開始畫面錯誤", e.message);
@@ -519,7 +615,7 @@
                 content.innerHTML = `
                     <div class="futuristic-card question-block p-6 md:p-8" data-original-index="${originalIndex}">
                         <div class="flex justify-between items-center mb-4">
-                            <!-- 修正：任務進度下移，避免被 Header 遮擋 -->
+                            <!-- 任務進度下移，避免被 Header 遮擋 -->
                             <span class="text-sm font-semibold text-orange-400 mt-2">
                                 任務進度 
                                 <span class="text-gray-200 ml-1">(${currentNumber} / ${totalQuestions} 題)</span>
@@ -530,7 +626,7 @@
                             <div class="progress-bar" style="width: ${progress.toFixed(2)}%;"></div>
                         </div>
 
-                        <!-- 修正：題目使用 text-amber-300 呈現 -->
+                        <!-- 題目使用 text-amber-300 呈現 -->
                         <h2 class="text-xl font-bold text-amber-300 mb-6">Q${currentNumber}. ${escapeHtml(currentItem.question)}</h2>
 
                         <!-- 題目圖片顯示區塊 (已移除圖片優化邏輯) -->
@@ -787,6 +883,10 @@
                     sortedChapterOverview: sortedChapterOverview, // 新增排序過的章節總覽
                     highestMasteryComp: highestMasteryComp // 新增最高得分的能力
                 };
+                
+                // 7. 提交數據到 Google Sheets (非同步，不阻礙結果渲染)
+                submitResultsToSheets(results);
+
 
                 renderResultScreen(results);
                 
@@ -795,6 +895,68 @@
 
             } catch (e) {
                 displayError("計算結果錯誤", e.message);
+            }
+        }
+        
+        /**
+         * 提交數據到 Google Sheets
+         * @param {Object} results - 測驗結果
+         */
+        function submitResultsToSheets(results) {
+            if (GOOGLE_SHEETS_ENDPOINT === 'YOUR_GOOGLE_FORM_SUBMIT_URL_HERE') {
+                console.warn("Google Sheets Endpoint is not set. Skipping data submission.");
+                return;
+            }
+
+            try {
+                // 準備要提交的數據
+                const formData = new FormData();
+                
+                // 基礎用戶數據 (使用實際的 Entry ID)
+                formData.append(GOOGLE_FORM_ENTRIES.userName, quizState.userName || 'N/A'); 
+                formData.append(GOOGLE_FORM_ENTRIES.userEmail, quizState.userEmail || 'N/A'); 
+                
+                // 核心結果
+                formData.append(GOOGLE_FORM_ENTRIES.totalScore, results.totalScore); // 總天分值
+                formData.append(GOOGLE_FORM_ENTRIES.prValue, results.prValue);    // PR 值
+
+                // 四大能力結果 (使用實際的 Entry ID)
+                results.competencyResults.forEach(comp => {
+                    if (comp.compName === '洞察市場與消費者') formData.append(GOOGLE_FORM_ENTRIES.comp1_Insight, comp.averageMastery);
+                    if (comp.compName === '擬定行銷策略') formData.append(GOOGLE_FORM_ENTRIES.comp2_Strategy, comp.averageMastery);
+                    if (comp.compName === '設計行銷活動內容') formData.append(GOOGLE_FORM_ENTRIES.comp3_Design, comp.averageMastery);
+                    if (comp.compName === '評估績效並調整') formData.append(GOOGLE_FORM_ENTRIES.comp4_Eval, comp.averageMastery);
+                });
+
+                // Q1-Q25 原始作答分數 (固定順序)
+                // 這裡必須確保所有 QUIZ_DATA 的題目都被包含，即使答案是 null
+                for(let i = 0; i < QUIZ_DATA.length; i++) {
+                    const score = quizState.answers[i] !== null ? quizState.answers[i] : 0;
+                    const entryKey = `Q${i + 1}_Score`;
+                    const entryId = GOOGLE_FORM_ENTRIES[entryKey];
+                    if (entryId) {
+                        formData.append(entryId, score); 
+                    } else {
+                        console.warn(`Missing Entry ID for ${entryKey}. Skipping.`);
+                    }
+                }
+
+
+                // 提交數據
+                fetch(GOOGLE_SHEETS_ENDPOINT, {
+                    method: 'POST',
+                    body: formData,
+                    mode: 'no-cors' // 必須使用 no-cors 模式來提交 Google Forms
+                })
+                .then(response => {
+                    console.log("Data submitted successfully (via no-cors mode).");
+                })
+                .catch(error => {
+                    console.error("Error submitting data to Google Sheets:", error);
+                });
+
+            } catch (e) {
+                console.error("Error preparing data for submission:", e);
             }
         }
         
@@ -941,7 +1103,7 @@
                             <div class="mb-3">
                                 <div class="flex justify-between items-center text-sm text-gray-400 mb-1">
                                     <span>${escapeHtml(chapter.chapterId)} ${escapeHtml(chapter.chapterName)}</span>
-                                    <span class="font-bold ${chapTextColorClass}">${percentage}%</span>
+                                    <span class="font-bold ${chapTextColorClass}">${chapPercentage}%</span>
                                 </div>
                                 <div class="mastery-bar-outer h-2 bg-gray-700">
                                     <div class="mastery-bar-inner ${chapColorClass}" style="${chapWidthStyle}"></div>
@@ -1028,6 +1190,9 @@
                         <p class="text-sm text-gray-500 mt-1">（贏過 ${results.prValue}% 的測驗者）</p>
                     </div>
                 `;
+                
+                // *** 新增：根據名字顯示客製化標題 ***
+                const personalizedTitle = quizState.userName ? `${escapeHtml(quizState.userName)} 的行銷天分值：` : '您的行銷天分值：';
 
 
                 content.innerHTML = `
@@ -1037,7 +1202,8 @@
                         
                         <!-- 總分區塊 (保留青色光暈) -->
                         <div class="bg-[#130E20] p-6 rounded-xl mb-8 border border-cyan-500/20 shadow-neon-cyan">
-                            <p class="text-lg text-cyan-400 mb-2">您的行銷天分值：</p>
+                            <!-- 顯示使用者名字 -->
+                            <p class="text-lg text-cyan-400 mb-2">${personalizedTitle}</p>
                             <div class="flex items-center justify-center">
                                 <p class="text-6xl font-extrabold ${scoreTextClass}">${results.totalScore}</p>
                             </div>
