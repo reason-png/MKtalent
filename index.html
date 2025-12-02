@@ -26,23 +26,19 @@
             background-color: #130E20; /* 深紫色/深藍色背景 */
             color: #E0E0E0; /* 淺色字體，高對比 */
             background-attachment: fixed;
-            /* 修正：精確計算 Header 高度 (約 5rem)，確保內容不被遮擋 */
-            padding-top: 5rem; 
-            /* 移除 body 預設邊距，改由內層 card 控制 */
+            /* 修正：移除 padding-top，由 static Header 和 content margin 控制空間 */
             margin: 0;
+            padding: 0;
         }
 
-        /* 固定頂部 Header 樣式 (Fixed) */
+        /* Header 樣式 (改為 Static，由正常文件流控制) */
         #main-header {
-            position: fixed;
-            top: 0;
-            left: 0;
             width: 100%;
             z-index: 1000; 
             background-color: #130E20; 
             border-bottom: 1px solid rgba(0, 255, 255, 0.1); 
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
-            padding: 0.5rem 0; /* 略微增加 padding 增加視覺空間 */
+            padding: 0.5rem 0;
         }
         
         .futuristic-card {
@@ -167,9 +163,9 @@
         }
     </style>
 </head>
-<body class="min-h-screen flex items-start justify-center">
+<body class="min-h-screen flex flex-col items-center">
 
-    <!-- 新增固定頂部 Header 區塊 (已縮小尺寸) -->
+    <!-- Header 恢復為標準文件流 DIV (Static) -->
     <header id="main-header" class="px-4 md:px-8">
         <!-- 容器置中 -->
         <div class="flex items-center justify-center max-w-2xl mx-auto h-full">
@@ -185,7 +181,7 @@
         </div>
     </header>
 
-    <div id="content" class="w-full max-w-2xl px-4 md:px-8">
+    <div id="content" class="w-full max-w-2xl px-4 md:px-8 mt-4">
         <!-- 應用程式內容將動態載入此處 --></div>
 
     <script>
@@ -642,6 +638,26 @@
             }
         }
 
+        /**
+         * 計算 PR 值 (百分位排名)
+         * 將分數 50-100 線性映射到 PR 值 1%-99%
+         * @param {number} score - 行銷天分值 (50-100)
+         * @returns {number} PR value (1-99)
+         */
+        function getPRValue(score) {
+            const minScore = 50;
+            const maxScore = 100;
+            const minPR = 1;
+            const maxPR = 99;
+
+            if (score <= minScore) return minPR;
+            if (score >= maxScore) return maxPR;
+
+            // 線性插值: PR = minPR + (Score - minScore) * (PR_Range / Score_Range)
+            const prValue = minPR + (score - minScore) * ((maxPR - minPR) / (maxScore - minScore));
+            return Math.min(maxPR, Math.round(prValue)); // 確保不超過 99
+        }
+
 
         /**
          * 計算並顯示測驗結果
@@ -682,8 +698,12 @@
                 // 2. 計算總分與天分值 (原始總分範圍 25-100)
                 // 轉換公式: 50 + (實際總分 - 25) * (50 / 75)
                 const marketingAptitudeValue = Math.round(50 + (actualTotalScore - 25) * (50 / 75));
+                
+                // 3. 計算 PR 值
+                const prValue = getPRValue(marketingAptitudeValue);
 
-                // 3. 計算章節掌握百分比 (Mastery Percentage)
+
+                // 4. 計算章節掌握百分比 (Mastery Percentage)
                 const chapterResults = Object.keys(chapterScores).map(chapterId => {
                     const maxScore = chapterMaxScores[chapterId]; // 章節滿分
                     const actualScore = chapterScores[chapterId]; // 章節實際得分
@@ -703,7 +723,7 @@
                 // ----------------------------------------------------
 
 
-                // 4. 彙整並計算四大能力平均掌握百分比
+                // 5. 彙整並計算四大能力平均掌握百分比
                 let competencyResults = Object.entries(COMPETENCY_MAPPING).map(([compName, chapterIds]) => {
                     let totalMastery = 0;
                     let count = 0;
@@ -738,7 +758,7 @@
                     return indexA - indexB;
                 });
                 
-                // 5. 找出得分最高的能力 (Highest Mastery Competency)
+                // 6. 找出得分最高的能力 (Highest Mastery Competency)
                 let highestMasteryComp = { compName: '', averageMastery: -1 };
                 
                 // *** 修正平手邏輯：依 FIXED_COMPETENCY_ORDER 優先順序破局 ***
@@ -749,8 +769,7 @@
                             // 發現更高分的能力，直接替換
                             highestMasteryComp = comp;
                         } else if (comp.averageMastery === highestMasteryComp.averageMastery) {
-                            // 分數相同，但 FIXED_COMPETENCY_ORDER 決定了目前的 comp 應該優先於 highestMasteryComp
-                            // (此處邏輯已在 for 迴圈的順序中體現，因為如果分數相等，它不會被替換，但會保留第一個找到的，也就是 FIXED_COMPETENCY_ORDER 優先級最高的)
+                            // 分數相同，維持 FIXED_COMPETENCY_ORDER 的順序
                             if (highestMasteryComp.compName === '') {
                                 highestMasteryComp = comp; // 確保第一個最高分被賦值
                             }
@@ -762,6 +781,7 @@
 
                 const results = {
                     totalScore: marketingAptitudeValue,
+                    prValue: prValue, // 新增 PR 值
                     competencyResults: competencyResults,
                     chapterResults: chapterResults, // 原始章節結果 (備用)
                     sortedChapterOverview: sortedChapterOverview, // 新增排序過的章節總覽
@@ -921,7 +941,7 @@
                             <div class="mb-3">
                                 <div class="flex justify-between items-center text-sm text-gray-400 mb-1">
                                     <span>${escapeHtml(chapter.chapterId)} ${escapeHtml(chapter.chapterName)}</span>
-                                    <span class="font-bold ${chapTextColorClass}">${chapPercentage}%</span>
+                                    <span class="font-bold ${chapTextColorClass}">${percentage}%</span>
                                 </div>
                                 <div class="mastery-bar-outer h-2 bg-gray-700">
                                     <div class="mastery-bar-inner ${chapColorClass}" style="${chapWidthStyle}"></div>
@@ -1000,6 +1020,14 @@
                         </div>
                     </div>
                 `;
+                
+                // --- 新增 PR 值顯示區塊 ---
+                const prDisplayHtml = `
+                    <div class="mt-4 pt-3 border-t border-cyan-500/30">
+                        <p class="text-xl font-extrabold text-orange-400">${results.prValue} PR</p>
+                        <p class="text-sm text-gray-500 mt-1">（贏過 ${results.prValue}% 的測驗者）</p>
+                    </div>
+                `;
 
 
                 content.innerHTML = `
@@ -1014,6 +1042,8 @@
                                 <p class="text-6xl font-extrabold ${scoreTextClass}">${results.totalScore}</p>
                             </div>
                             <p class="text-gray-500 mt-2">（滿分 100 分）</p>
+                            <!-- 插入 PR 值顯示 -->
+                            ${prDisplayHtml}
                         </div>
 
                         <!-- ** 區塊順序：各領域掌握度分析 (上方)** -->
