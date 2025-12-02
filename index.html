@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>行銷天賦測驗平台</title>
+    <title>TIMS行銷天分測評</title>
     <!-- 載入 Tailwind CSS --><script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* 自定義霓虹光暈效果 */
@@ -26,21 +26,23 @@
             background-color: #130E20; /* 深紫色/深藍色背景 */
             color: #E0E0E0; /* 淺色字體，高對比 */
             background-attachment: fixed;
-            /* 最終修正：增加 padding-top 到 6.5rem，確保內容不被 Header 遮擋 */
-            padding-top: 6.5rem; 
+            /* 修正：精確計算 Header 高度 (約 5rem)，確保內容不被遮擋 */
+            padding-top: 5rem; 
+            /* 移除 body 預設邊距，改由內層 card 控制 */
+            margin: 0;
         }
 
-        /* 固定頂部 Header 樣式 (高度縮小) */
+        /* 固定頂部 Header 樣式 (Fixed) */
         #main-header {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
-            z-index: 1000; /* 提高 Z-index 權重 */
+            z-index: 1000; 
             background-color: #130E20; 
-            border-bottom: 1px solid rgba(0, 255, 255, 0.1); /* 邊框變細 */
+            border-bottom: 1px solid rgba(0, 255, 255, 0.1); 
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
-            padding: 0.25rem 0; /* 減少垂直 Padding */
+            padding: 0.5rem 0; /* 略微增加 padding 增加視覺空間 */
         }
         
         .futuristic-card {
@@ -165,7 +167,7 @@
         }
     </style>
 </head>
-<body class="p-4 md:p-8 min-h-screen flex items-start justify-center">
+<body class="min-h-screen flex items-start justify-center">
 
     <!-- 新增固定頂部 Header 區塊 (已縮小尺寸) -->
     <header id="main-header" class="px-4 md:px-8">
@@ -183,39 +185,39 @@
         </div>
     </header>
 
-    <div id="content" class="w-full max-w-2xl">
+    <div id="content" class="w-full max-w-2xl px-4 md:px-8">
         <!-- 應用程式內容將動態載入此處 --></div>
 
     <script>
         // ----------------------------------------------------
-        // 核心題庫資料 (共 25 題)
+        // 核心題庫資料 (共 25 題) - 已替換為最新的題目列表
         // ----------------------------------------------------
         const QUIZ_DATA = [
             { chapterId: "CH1", chapterName: "行銷源典", question: "你如何看待「買一送一」的促銷優惠所帶來的營收增長？", imageUrl: "https://i.postimg.cc/fLGwYWL8/wei-ming-ming-1.jpg", options: [{ text: "這是暫時的手段，顧客是否還願意回購才是真正的關鍵。", score: 4 }, { text: "有效的短期戰術，創造消費者願意支付的價值。", score: 2 }, { text: "這是必要的價格讓利，能確最短時間內創造大量營收。", score: 1 }] },
-            { chapterId: "CH1", chapterName: "行銷源典", question: "有一位主管說：「本次母親節檔期促銷方案，讓我們的按摩椅大熱銷，這代表我們行銷做得很好。」你對於這段話的理解是？", imageUrl: "https://i.postimg.cc/bvRFjp4x/wei-ming-ming-2.jpg", options: [{ text: "不認同，因真正的成功關鍵在於能否建立品牌長期價值與顧客忠誠度。", score: 4 }, { text: "觀察態度。但代表我們至少成功讓消費者願意付費購買，確保產品在市場上有一定競爭力。", score: 2 }, { text: "認同，這可能代表我們的定價或促銷策略成功，創造了價格優勢。", score: 1 }] },
+            { chapterId: "CH1", chapterName: "行銷源典", question: "有一位主管說：「本次母親節檔期促銷方案，讓我們的按摩椅大熱銷，這代表我們行銷做得很好。」你對於這段話的理解是？", imageUrl: "https://i.postimg.cc/bvRFjp4x/wei-ming-ming-2.jpg", options: [{ text: "不認同，因真正的成功關鍵在於能否建立品牌長期價值與顧客忠誠度。", score: 4 }, { text: "持保留態度。但代表我們至少成功讓消費者願意付費購買，確保產品在市場上有一定競爭力。", score: 2 }, { text: "認同，這可能代表我們的定價或促銷策略成功，創造了價格優勢。", score: 1 }] },
             { chapterId: "CH10", chapterName: "行銷績效KPI", question: "若您在工作中收到一張新客戶的名片（LINE）之後，你會如何處理此通訊資料？", imageUrl: "https://i.postimg.cc/fbvghD1d/wei-ming-ming-3.jpg", options: [{ text: "記錄他工作相關資訊與興趣嗜好", score: 4 }, { text: "記錄當日的會面情境和聊天主題", score: 2 }, { text: "記錄他的電話和姓名", score: 1 }] },
-            { chapterId: "CH10", chapterName: "行銷績效KPI", question: "你經營一家便當店，有三種顧客類型。若以顧客價值來看，你會比較喜歡哪一種客人？", imageUrl: "https://i.postimg.cc/9fBNjCsP/wei-ming-ming-4.jpg", options: [{ text: "固定每週三、四都會跟你買一個便當的客人。", score: 4 }, { text: "不定時購買，但一次都買 30 個便當的客人。", score: 2 }, { text: "只有當你便當有促銷活動時，才會跟你買的客人。", score: 1 }] },
-            { chapterId: "CH10", chapterName: "行銷績效KPI", question: "手搖飲料總部現在有三種資源可以提供給您：1. 會員與銷售資料庫 2. 公司調查的消費者飲用偏好報告書 3. 資深品牌經理訪談機會。如果你今天想要開發新手搖飲品，你會傾向於使用哪一個資源輔助您開發新產品？", imageUrl: "https://i.postimg.cc/xdPFSnBK/wei-ming-ming-5.jpg", options: [{ text: "會員與銷售資料庫", score: 4 }, { text: "公司調查的消費者飲用偏好報告書", score: 2 }, { text: "資深品牌經理訪談機會", score: 1 }] },
-            { chapterId: "CH2", chapterName: "市場分析", question: "你會用什麼方式解釋現在喝手搖飲料的消費者特徵？", imageUrl: "https://i.postimg.cc/V6LZf2c4/wei-ming-ming-6.jpg", options: [{ text: "透過「喝飲料的情境」來解釋，例如：解饞型、分享型。", score: 4 }, { text: "透過「喝飲料的願付價格」來解釋。例如：偏好高價位、低價位。", score: 2 }, { text: "透過喝飲料的「性別」或「年齡」來解釋，例如：20-30 歲女性。", score: 1 }] },
-            { chapterId: "CH2", chapterName: "市場分析", question: "手搖飲料店已經競爭激烈的成熟市場，為了找出新機會，你會怎麼做？", imageUrl: "https://i.postimg.cc/76YtHjy1/wei-ming-ming-7.jpg", options: [{ text: "透過視覺化工具，找出競爭者尚未滿足的潛在市場空隙。", score: 4 }, { text: "研究競爭對手的價格和優惠活動，確保自家產品能提供更好的 CP 值。", score: 2 }, { text: "模仿強勢競爭者的熱門產品，並推出更低價格，以快速搶佔市場。", score: 1 }] },
+            { chapterId: "CH10", chapterName: "行銷績效KPI", question: "你經營一家便當店，有三種顧客類型。若以顧客價值來看，你會比較喜歡哪一種客人？", imageUrl: "https://i.postimg.cc/9fBNjCsP/wei-ming-ming-4.jpg", options: [{ text: "固定每週三、四都會跟你買一個便當的客人。", score: 4 }, { text: "不定時購買，但一次都買 50 個便當的客人。", score: 2 }, { text: "只有當你便當有促銷活動時，才會跟你買的客人。", score: 1 }] },
+            { chapterId: "CH10", chapterName: "行銷績效KPI", question: "如果你經營的手搖飲料店，想要開發新產品，你會傾向於使用哪一個資料輔助您研發產品？", imageUrl: "https://i.postimg.cc/xdPFSnBK/wei-ming-ming-5.jpg", options: [{ text: "會員與銷售資料庫", score: 4 }, { text: "消費者飲用偏好報告書", score: 2 }, { text: "總公司品牌經理訪談", score: 1 }] },
+            { chapterId: "CH2", chapterName: "市場分析", question: "你會用什麼方式解釋現在喝手搖飲料的消費者特徵？", imageUrl: "https://i.postimg.cc/V6LZf2c4/wei-ming-ming-6.jpg", options: [{ text: "透過喝飲料的「情境」來解釋，例如：解饞型、分享型。", score: 4 }, { text: "透過喝飲料的「願付價格」來解釋。例如：偏好高價位、低價位。", score: 2 }, { text: "透過喝飲料的「性別」或「年齡」來解釋，例如：25-35歲女性。", score: 1 }] },
+            { chapterId: "CH2", chapterName: "市場分析", question: "手搖飲料店已經競爭激烈的成熟市場，為了找出新機會，你會怎麼做？", imageUrl: "https://i.postimg.cc/76YtHjy1/wei-ming-ming-7.jpg", options: [{ text: "找出競爭者尚未滿足的潛在市場空隙。", score: 4 }, { text: "研究競爭對手的價格和優惠活動，確保自家產品能提供更好的 CP 值。", score: 2 }, { text: "模仿強勢競爭者的熱門產品，並推出更低價格，以快速搶佔市場。", score: 1 }] },
             { chapterId: "CH3", chapterName: "消費者行為", question: "你在搭飛機時，看到有人選擇坐「商務艙」，有人選擇坐「經濟艙」，你會怎麼解釋這種現象？", imageUrl: "https://i.postimg.cc/635bWFNr/wei-ming-ming-8.jpg", options: [{ text: "不同旅客追求的體驗而有所完全不同 。", score: 4 }, { text: "為了襯托身分地位感受上的需求", score: 2 }, { text: "收入水平的差異，反映出他們對金錢的承受能力不同 。", score: 1 }] },
-            { chapterId: "CH3", chapterName: "消費者行為", question: "你如何看待，便利商店會有這麼多礦泉水的品牌?", imageUrl: "https://i.postimg.cc/RFVpS2zP/wei-ming-ming-9.jpg", options: [{ text: "滿足消費者對多樣化的偏好，提供更多的選擇空間。", score: 4 }, { text: "商店的經營特色，就是要讓消費者隨時買到多樣商品。", score: 2 }, { text: "廠商希望透過不同包裝和品項，增加多種收入和曝光機會。", score: 1 }] },
+            { chapterId: "CH3", chapterName: "消費者行為", question: "你如何看待，便利商店會有這麼多礦泉水的品牌?", imageUrl: "https://i.postimg.cc/RFVpS2zP/wei-ming-ming-9.jpg", options: [{ text: "滿足消費者對多樣化的偏好，提供更多的選項。", score: 4 }, { text: "商店的經營特色，就是要讓消費者隨時買到多樣商品。", score: 2 }, { text: "廠商希望透過不同包裝和品項，增加多種收入和曝光機會。", score: 1 }] },
             { chapterId: "CH3", chapterName: "消費者行為", question: "消費者在購買需求通常呈現何種特性？", imageUrl: "https://i.postimg.cc/zBX2z41s/wei-ming-ming-10.jpg", options: [{ text: "多元且會隨時間、情境產生變化", score: 4 }, { text: "完全隨機、毫無規律", score: 2 }, { text: "只受價格因素影響", score: 1 }] },
-            { chapterId: "CH4", chapterName: "行銷研究", question: "若你想了解「消費者購買自動駕駛電動車的動機」，但市面上卻沒有相關完整資料，這時你「優先」會怎麼做？", imageUrl: "https://i.postimg.cc/9M88r1Wx/wei-ming-ming-11.jpg", options: [{ text: "焦點團體訪談，或邀請專家進行諮詢。", score: 4 }, { text: "運用次級資料（如政府統計、產業報告），進行初步探索。", score: 2 }, { text: "設計量化問卷，收集市場平均意見作為參考。", score: 1 }] },
-            { chapterId: "CH4", chapterName: "行銷研究", question: "在做一個對你而言「相對重要」的決定前，你傾向於？", imageUrl: "https://i.postimg.cc/fL22J5wq/wei-ming-ming-12.jpg", options: [{ text: "規劃蒐集客觀資料來驗證", score: 4 }, { text: "詢問身邊的人意見，讓多數人幫你決定。", score: 2 }, { text: "憑藉過往經驗或直覺，快速下決定。", score: 1 }] },
+            { chapterId: "CH4", chapterName: "行銷研究", question: "若你想了解「消費者購買自動駕駛電動車的動機」，但市面上卻沒有相關完整資料，這時你「優先」會怎麼做？", imageUrl: "https://i.postimg.cc/9M88r1Wx/wei-ming-ming-11.jpg", options: [{ text: "採取焦點團體訪談，或尋找專家諮詢。", score: 4 }, { text: "運用次級資料（如政府統計、產業報告），進行初步探索。", score: 2 }, { text: "設計量化問卷，蒐集市場平均意見作為參考。", score: 1 }] },
+            { chapterId: "CH4", chapterName: "行銷研究", question: "在做一個對你而言「相對重要」的決定前，你傾向於？", imageUrl: "https://i.postimg.cc/fL22J5wq/wei-ming-ming-12.jpg", options: [{ text: "規劃蒐集資料來驗證。", score: 4 }, { text: "詢問身邊的人意見。", score: 2 }, { text: "憑藉過往經驗或直覺決定。", score: 1 }] },
             { chapterId: "CH5", chapterName: "產品策略", question: "假使你經營的咖啡店中，拿鐵系列很受歡迎，你希望加深它在顧客心中的價值，你會採取哪種策略?", imageUrl: "https://i.postimg.cc/85KKjw1q/wei-ming-ming-13.jpg", options: [{ text: "針對拿鐵推出不同奶種、不同口味的選項。", score: 4 }, { text: "增加新的輕食或甜點品類，豐富菜單。", score: 2 }, { text: "推出更實惠平價的優惠組合。", score: 1 }] },
-            { chapterId: "CH5", chapterName: "產品策略", question: "假如你在設計一款手搖飲料的杯子時，你會優先考量?", imageUrl: "https://i.postimg.cc/pTGGpkWN/wei-ming-ming-14.jpg", options: [{ text: "必須在架上一眼被看見，並且能清楚傳達品牌形象。", score: 4 }, { text: "必須確保其設計能充分保護產品，使其易於儲存和運輸。", score: 2 }, { text: "必須確保其尺寸和材質能有效降低生產成本。", score: 1 }] },
-            { chapterId: "CH5", chapterName: "產品策略", question: "你覺得產品「最重要的價值」是什麼？", imageUrl: "https://i.postimg.cc/W3WWhSNc/wei-ming-ming-15.jpg", options: [{ text: "必須清楚傳遞「為何而做」，能解決顧客最根本的需求。", score: 4 }, { text: "具備最好的硬體規格和穩定的基本功能，才能讓顧客買得安心。", score: 2 }, { text: "外觀設計藝術精美，並且有醒目品牌 Logo 。", score: 1 }] },
-            { chapterId: "CH5", chapterName: "產品策略", question: "當你發現你經營品牌，熱門產品的銷售開始下滑，你會怎麼辦？", imageUrl: "https://i.postimg.cc/C1PPzJhY/wei-ming-ming-16.jpg", options: [{ text: "分析是否競爭者太多，並思考產品創新或轉型機會", score: 4 }, { text: "認為是宣傳不夠，要求增加廣告預算", score: 2 }, { text: "降價促銷，把庫存清掉止損", score: 1 }] },
+            { chapterId: "CH5", chapterName: "產品策略", question: "假如你在設計一款手搖飲料的杯子時，你會優先考量?", imageUrl: "https://i.postimg.cc/pTGGpkWN/wei-ming-ming-14.jpg", options: [{ text: "確保風格與品牌理念相同，能清楚傳達品牌形象。", score: 4 }, { text: "確保能充分保護產品，使其易於儲存和運輸。", score: 2 }, { text: "確保尺寸和材質能有效降低生產成本。", score: 1 }] },
+            { chapterId: "CH5", chapterName: "產品策略", question: "你認為產品「物美價廉」中的「物美」應該是指什麼？", imageUrl: "https://i.postimg.cc/W3WWhSNc/wei-ming-ming-15.jpg", options: [{ text: "具備能解決顧客最根本的需求。", score: 4 }, { text: "具備最好的產品績效表現功能。", score: 2 }, { text: "具備顧客負擔得起的價格。", score: 1 }] },
+            { chapterId: "CH5", chapterName: "產品策略", question: "當你發現你經營品牌，熱門產品的銷售開始下滑，你會怎麼辦？", imageUrl: "https://i.postimg.cc/C1PPzJhY/wei-ming-ming-16.jpg", options: [{ text: "分析是否競爭者太多，並思考產品創新或轉型機會。", score: 4 }, { text: "認為是宣傳不夠，要求增加廣告預算。", score: 2 }, { text: "開始降價促銷，把庫存清掉止損。", score: 1 }] },
             { chapterId: "CH6", chapterName: "品牌經營", question: "企業都想要建立自己品牌，你認為「品牌」最大的好處是什麼?", imageUrl: "https://i.postimg.cc/SsTTJVSQ/wei-ming-ming-17.jpg", options: [{ text: "消費者願意重複購買你的產品", score: 2 }, { text: "消費者願意花更多錢買你產品", score: 4 }, { text: "消費者對你的產品有高度好感", score: 1 }] },
-            { chapterId: "CH6", chapterName: "品牌經營", question: "你覺得為什麼消費者會特別忠於某特定品牌，並持續購買？", imageUrl: "https://i.postimg.cc/NMJJ5bsg/wei-ming-ming-18.jpg", options: [{ text: "因為已在心中已建立的獨特形象與連結。", score: 4 }, { text: "因為功能、品質可靠，以及實際效用。", score: 2 }, { text: "因為價格和性價比，以及是否划算。", score: 1 }] },
-            { chapterId: "CH7", chapterName: "定價策略", question: "如果有消費者跟你抱怨：「你們品牌的家電冰箱很貴。」以下哪一種是你最有可能回覆內容？", imageUrl: "https://i.postimg.cc/k411BwJg/wei-ming-ming-19.jpg", options: [{ text: "強調產品能解決顧客什麼樣的核心問題。", score: 4 }, { text: "告知產品已是業界相同規格中的最低價，且性價比最高。", score: 2 }, { text: "建議顧客使用分期付款或現金折扣，促進成交。", score: 1 }] },
+            { chapterId: "CH6", chapterName: "品牌經營", question: "你覺得為什麼消費者會特別忠於某特定品牌，並持續購買？", imageUrl: "https://i.postimg.cc/NMJJ5bsg/wei-ming-ming-18.jpg", options: [{ text: "因為已在心中已建立的獨特形象連結。", score: 4 }, { text: "因為功能、品質可靠，以及實際效用。", score: 2 }, { text: "因為價格和性價比，以及是否划算。", score: 1 }] },
+            { chapterId: "CH7", chapterName: "定價策略", question: "如果有消費者跟你抱怨：「你們品牌的家電冰箱很貴。」以下哪一種是你最有可能回覆內容？", imageUrl: "https://i.postimg.cc/k411BwJg/wei-ming-ming-19.jpg", options: [{ text: "強調產品能解決顧客什麼樣的核心問題。", score: 4 }, { text: "告知產品已是相同規格中的最低價，且性價比最高。", score: 2 }, { text: "建議顧客使用分期付款或現金折扣，促進成交。", score: 1 }] },
             { chapterId: "CH7", chapterName: "定價策略", question: "在決定一個產品價格時，你認為最關鍵的考量點是？", imageUrl: "https://i.postimg.cc/j5ggLvxj/wei-ming-ming-20.jpg", options: [{ text: "顧客認為這個產品或服務值多少錢。", score: 4 }, { text: "製作這個產品的總成本是多少，然後加上合理的利潤。", score: 2 }, { text: "競爭對手的價格是多少，我只要比他們低一點。", score: 1 }] },
-            { chapterId: "CH8", chapterName: "推廣策略", question: "如果你開一家手搖飲料店，想要辦理開幕活動，以下哪一種策略是你最傾向舉辦?", imageUrl: "https://i.postimg.cc/d1HHLnsk/wei-ming-ming-21.jpg", options: [{ text: "加入會員後，可集點紅利回饋", score: 4 }, { text: "買飲料送折價券 (下次使用)", score: 2 }, { text: "熱門飲品買一送一活動", score: 1 }] },
+            { chapterId: "CH8", chapterName: "推廣策略", question: "如果你要舉辦手搖飲料店的「開幕活動」，以下哪一種促銷策略是你最傾向的?", imageUrl: "https://i.postimg.cc/d1HHLnsk/wei-ming-ming-21.jpg", options: [{ text: "加入會員後，可集點紅利回饋", score: 4 }, { text: "買飲料送折價券 (下次使用)", score: 2 }, { text: "熱門飲品買一送一活動", score: 1 }] },
             { chapterId: "CH8", chapterName: "推廣策略", question: "你覺得「廣告」跟「媒體」是否有差別?", imageUrl: "https://i.postimg.cc/gJSSn4zw/wei-ming-ming-22.jpg", options: [{ text: "兩者有明顯差別", score: 4 }, { text: "兩者有部分重疊", score: 2 }, { text: "幾乎沒有差別", score: 1 }] },
-            { chapterId: "CH8", chapterName: "推廣策略", question: "如果你是手搖飲料品牌行銷經理，你會期望用什麼管道推播公司開發的新產品正式發售？", imageUrl: "https://i.postimg.cc/7h5B77hq/wei-ming-ming-23.jpg", options: [{ text: "透過自己建立的官方社群曝光", score: 4 }, { text: "付費給公信力高的媒體進行報導", score: 2 }, { text: "投放人流量較高的戶外看板廣告", score: 1 }] },
-            { chapterId: "CH9", chapterName: "通路策略", question: "「源家」是你在經營手工水餃品牌，賣點訴求就是家鄉手工風味，全台僅一家經營，至今為止生意都很好。假如今天有一家企業想投資你生產製作冷凍水餃，你的反應是？", imageUrl: "https://i.postimg.cc/j2D8NN2x/wei-ming-ming-24.jpg", options: [{ text: "不合作，忠於原本的手工堅持，不生產冷凍水餃。", score: 4 }, { text: "積極合作，擴大市場規模，將產品推向更廣泛的消費族群 。", score: 2 }, { text: "可以合作，但僅以「源家」品牌名稱開發其他系列冷凍食品。", score: 1 }] },
-            { chapterId: "CH9", chapterName: "通路策略", question: "一瓶礦泉水在便利商店賣 20 元，但是在百貨公司可以賣 40 元，你會如何解釋這現象？", imageUrl: "https://i.postimg.cc/HnrS55nk/wei-ming-ming-25.jpg", options: [{ text: "因百貨公司為產品創造了不同的品牌價值。", score: 4 }, { text: "因百貨公司的營運和上架費用比便利商店高。", score: 2 }, { text: "因在百貨公司內，這類產品的競爭品牌相對較少。", score: 1 }] }
+            { chapterId: "CH8", chapterName: "推廣策略", question: "如果你是手搖飲料品牌行銷經理，你會期望用什麼管道推播公司開發的新產品正式發售？", imageUrl: "https://i.postimg.cc/7h5B77hq/wei-ming-ming-23.jpg", options: [{ text: "透過自己建立的官方社群曝光", score: 4 }, { text: "具公信力高的媒體進行報導", score: 2 }, { text: "人流量較高的戶外電子看板", score: 1 }] },
+            { chapterId: "CH9", chapterName: "通路策略", question: "「源家」是你在經營手工水餃品牌，賣點訴求就是手工家鄉風味，全台僅一家經營，至今為止生意都很好。假如今天有企業想投資你生產製作「加工冷凍水餃」擴大銷售量，你的反應是？", imageUrl: "https://i.postimg.cc/j2D8NN2x/wei-ming-ming-24.jpg", options: [{ text: "不合作，忠於原本的手工堅持，不生產冷凍水餃。", score: 4 }, { text: "積極合作，擴大市場規模，將產品推向更廣泛的消費族群 。", score: 2 }, { text: "可以合作，但僅以「源家」品牌名稱開發「非水餃品類」冷凍加工食品。", score: 1 }] },
+            { chapterId: "CH9", chapterName: "通路策略", question: "一瓶礦泉水在便利商店賣 20 元，但是在百貨公司可以賣 40 元，你會如何解釋這現象？", imageUrl: "https://i.postimg.cc/HnrS55nk/wei-ming-ming-25.jpg", options: [{ text: "因百貨公司為產品創造不同的品牌價值。", score: 4 }, { text: "因百貨公司的上架費用比便利商店高。", score: 2 }, { text: "因在百貨公司內競爭品牌相對較少。", score: 1 }] }
         ];
 
         // 新增四大能力分類對應 (已更新)
@@ -232,6 +234,46 @@
             '擬定行銷策略': `<svg class="w-5 h-5 mr-2 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 2m0 0l-2-2m2 2v2M9.69 19L2 12l7.69-7M14.31 5L22 12l-7.69 7"></path></svg>`, // 羅盤/方向
             '設計行銷活動內容': `<svg class="w-5 h-5 mr-2 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>`, // 閃電/活動
             '評估績效並調整': `<svg class="w-5 h-5 mr-2 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M17 14h-7m5 4h-5m7 2H7a2 2 0 01-2-2V5a2 2 0 012-2h10a2 2 0 012 2v14a2 2 0 01-2 2z"></path></svg>` // 圖表/趨勢
+        };
+        
+        // 職涯描述數據 (用於動態生成推薦)
+        const CAREER_GUIDANCE_DATA = {
+            '洞察市場與消費者': {
+                icon: COMPETENCY_ICONS['洞察市場與消費者'],
+                focus: '資料收集、競品分析、消費者洞察、策略前置研究',
+                roles: [
+                    '市場研究員：專門負責市場調查、量化／質化研究、競品研究。',
+                    '行銷分析師：利用數據分析市場趨勢、客戶行為與產品績效。',
+                    '商業分析師：從商業與策略角度解析市場與產業動態。'
+                ]
+            },
+            '擬定行銷策略': {
+                icon: COMPETENCY_ICONS['擬定行銷策略'],
+                focus: '品牌定位、目標客群、策略規劃、訊息架構',
+                roles: [
+                    '行銷企劃專員：負責制定行銷主軸、年度企劃、品牌溝通架構。',
+                    '品牌經理：掌握品牌策略方向、定位與整體市場操作。',
+                    '內容策略師：規劃品牌內容主題、溝通語調與受眾策略。'
+                ]
+            },
+            '設計行銷活動內容': {
+                icon: COMPETENCY_ICONS['設計行銷活動內容'],
+                focus: '活動企劃、內容創作、通路選擇、跨部門執行',
+                roles: [
+                    '活動企劃：設計線上線下活動，負責執行與成效。',
+                    '社群經營：為不同平台打造貼文、短片、互動內容。',
+                    '整合行銷企劃：整合廣告、社群、公關與通路活動。'
+                ]
+            },
+            '評估績效並調整': {
+                icon: COMPETENCY_ICONS['評估績效並調整'],
+                focus: 'KPI追蹤、數據解讀、成效檢討、優化建議',
+                roles: [
+                    '數據行銷專員：分析廣告投放成效、優化轉換。',
+                    '成效分析專員：負責活動、媒體、數據的整體回顧分析。',
+                    'CRM / 成效優化專員：透過會員數據優化活動與再行銷策略。'
+                ]
+            }
         };
 
         // ----------------------------------------------------
@@ -399,8 +441,10 @@
                                     <div class="flex-1">
                                         <!-- 修正：標題替換 -->
                                         <span class="text-cyan-400 font-bold text-lg">認證前哨戰：</span> 
-                                        <!-- 修正：內文替換 -->
-                                        <div class="mt-1 text-gray-300">讓你精準了解哪個章節是你的天生強項，哪個章節又是補強重點！</div>
+                                        <!-- 修正：內文替換為最新的需求 -->
+                                        <div class="mt-1 text-gray-300">
+                                            為<span class="text-orange-400 font-bold">TIMS行銷企劃證照</span>準備，讓你精準了解哪個章節是你的天生強項，哪個章節又是補強重點！
+                                        </div>
                                     </div>
                                 </li>
                             </ul>
@@ -693,13 +737,35 @@
                     if (indexB === -1) return -1;
                     return indexA - indexB;
                 });
+                
+                // 5. 找出得分最高的能力 (Highest Mastery Competency)
+                let highestMasteryComp = { compName: '', averageMastery: -1 };
+                
+                // *** 修正平手邏輯：依 FIXED_COMPETENCY_ORDER 優先順序破局 ***
+                for (const fixedName of FIXED_COMPETENCY_ORDER) {
+                    const comp = competencyResults.find(c => c.compName === fixedName);
+                    if (comp) {
+                        if (comp.averageMastery > highestMasteryComp.averageMastery) {
+                            // 發現更高分的能力，直接替換
+                            highestMasteryComp = comp;
+                        } else if (comp.averageMastery === highestMasteryComp.averageMastery) {
+                            // 分數相同，但 FIXED_COMPETENCY_ORDER 決定了目前的 comp 應該優先於 highestMasteryComp
+                            // (此處邏輯已在 for 迴圈的順序中體現，因為如果分數相等，它不會被替換，但會保留第一個找到的，也就是 FIXED_COMPETENCY_ORDER 優先級最高的)
+                            if (highestMasteryComp.compName === '') {
+                                highestMasteryComp = comp; // 確保第一個最高分被賦值
+                            }
+                        }
+                    }
+                }
+                // ----------------------------------------------------
 
 
                 const results = {
                     totalScore: marketingAptitudeValue,
                     competencyResults: competencyResults,
                     chapterResults: chapterResults, // 原始章節結果 (備用)
-                    sortedChapterOverview: sortedChapterOverview // 新增排序過的章節總覽
+                    sortedChapterOverview: sortedChapterOverview, // 新增排序過的章節總覽
+                    highestMasteryComp: highestMasteryComp // 新增最高得分的能力
                 };
 
                 renderResultScreen(results);
@@ -752,8 +818,41 @@
                 } else {
                     scoreTextClass = 'text-red-500 shadow-neon-orange/50';
                 }
+                
+                // --- 1. 動態生成推薦職涯區塊 ---
+                const recommendedComp = results.highestMasteryComp;
+                // 增加防護檢查，確保 recommendedComp.compName 不為空
+                const recommendedGuide = recommendedComp.compName ? CAREER_GUIDANCE_DATA[recommendedComp.compName] : null;
+                
+                let recommendedCareerHtml = '';
 
-                // --- 構建所有章節掌握度概覽 HTML ---
+                if (recommendedGuide) {
+                    const rolesHtml = recommendedGuide.roles.map(role => `<li class="text-gray-300">${role}</li>`).join('');
+                    
+                    // *** 修正：移除百分比顯示 (58%) ***
+                    recommendedCareerHtml = `
+                        <div class="bg-[#130E20] p-6 rounded-xl mb-6 border border-orange-500/30 shadow-neon-orange text-left">
+                            <h3 class="text-xl font-bold text-orange-400 mb-3 flex items-center">
+                                ${recommendedGuide.icon.replace('text-cyan-400', 'text-orange-400')}
+                                <span class="title-glow">推薦就業方向：${recommendedComp.compName}</span>
+                            </h3>
+                            
+                            <div class="mb-4">
+                                <span class="block text-cyan-400 font-bold text-sm mb-1">能力重點：</span>
+                                <span class="text-gray-300 ml-3">${recommendedGuide.focus}</span>
+                            </div>
+                            
+                            <div>
+                                <span class="block text-cyan-400 font-bold text-sm mb-1">適合職缺：</span>
+                                <ul class="list-disc list-inside ml-6 text-gray-300 space-y-0.5">
+                                    ${rolesHtml}
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // --- 2. 構建所有章節掌握度概覽 HTML ---
                 const chapterOverviewHtml = results.sortedChapterOverview.map(chapter => {
                     const percentage = chapter.masteryPercentage;
                     let colorClass = 'bg-lime-600'; // 霓虹綠
@@ -787,7 +886,7 @@
                 // ---------------------------------------------
 
 
-                // 構建四大能力卡片
+                // --- 3. 構建四大能力卡片 (帶有詳細說明) ---
                 const competencyHtml = results.competencyResults.map(comp => {
                     const percentage = comp.averageMastery;
                     let colorClass = 'bg-lime-500'; // 良好: 霓虹綠
@@ -831,6 +930,9 @@
                         `;
                     }).join('');
 
+                    // 動態生成適合職缺清單 (用於手風琴內容)
+                    const detailGuide = CAREER_GUIDANCE_DATA[comp.compName];
+                    const rolesListHtml = detailGuide.roles.map(role => `<li>${role}</li>`).join('');
 
                     return `
                         <div class="mb-4 futuristic-card p-0 shadow-none border-none">
@@ -843,7 +945,7 @@
                                     <h3 class="text-base font-bold text-gray-200">${escapeHtml(comp.compName)}</h3>
                                 </div>
 
-                                <!-- 修正：長條圖與百分比 (第二行) -->
+                                <!-- 修正：長條圖與百分比 (第二行 - 上下分段) -->
                                 <div class="flex items-center justify-between">
                                     <div class="mastery-bar-outer flex-grow mr-4 bg-gray-700"> 
                                         <div class="mastery-bar-inner ${colorClass}" style="${widthStyle}"></div>
@@ -855,8 +957,17 @@
 
                             <!-- 展開內容 (Accordion Content) -->
                             <div id="content-${compId}" class="accordion-content">
-                                <div class="p-4 pt-0 mt-2">
-                                    <!-- 修正：涵蓋之章節掌握百分比 -->
+                                <div class="p-4 pt-0 mt-2 text-left text-gray-300">
+                                    <!-- 將能力重點與適合職缺移動到手風琴內部 -->
+                                    <div class="mb-4 p-3 bg-[#130E20] rounded-md border border-gray-700">
+                                        <span class="block text-orange-400 font-bold text-sm mb-1">能力重點：</span>
+                                        <p class="text-sm ml-3 mb-2">${detailGuide.focus}</p>
+                                        <span class="block text-cyan-400 font-bold text-sm mb-1">適合職缺：</span>
+                                        <ul class="list-disc list-inside ml-6 text-xs space-y-0.5">
+                                            ${rolesListHtml}
+                                        </ul>
+                                    </div>
+
                                     <p class="text-sm font-semibold text-gray-300 mb-3">涵蓋之章節掌握百分比</p>
                                     ${chapterDetailHtml}
                                 </div>
@@ -864,28 +975,6 @@
                         </div>
                     `;
                 }).join('');
-                
-                // 新增就業方向說明 HTML (已優化排版)
-                const careerGuidanceHtml = `
-                    <ul class="text-sm text-gray-300 space-y-3 mb-4">
-                        <li class="flex flex-col items-start">
-                            <span class="text-cyan-400 font-bold mb-1">1. 洞察市場與消費者：</span>
-                            <span class="text-gray-300">收集並分析市場資料、競爭者動向與消費者行為，作為策略規劃的基礎。</span>
-                        </li>
-                        <li class="flex flex-col items-start">
-                            <span class="text-cyan-400 font-bold mb-1">2. 擬定行銷策略：</span>
-                            <span class="text-gray-300">根據品牌定位與目標客群設計整體行銷主軸、訊息架構與溝通方式。</span>
-                        </li>
-                        <li class="flex flex-col items-start">
-                            <span class="text-cyan-400 font-bold mb-1">3. 設計行銷活動內容：</span>
-                            <span class="text-gray-300">策劃活動主題、內容素材與通路策略，提升消費者接觸與參與。</span>
-                        </li>
-                        <li class="flex flex-col items-start">
-                            <span class="text-cyan-400 font-bold mb-1">4. 評估績效並調整：</span>
-                            <span class="text-gray-300">檢視KPI達成率，從數據中找出問題點並提出修正建議。</span>
-                        </li>
-                    </ul>
-                `;
                 
                 // 修正掌握度說明格式
                 const masteryLegendHtml = `
@@ -901,13 +990,13 @@
                     </div>
                 `;
                 
-                // 修正學習建議格式
+                // 修正學習建議格式 (已更新內容)
                 const learningAdviceHtml = `
                     <div class="text-sm text-orange-400 mb-3 border-b border-gray-800 pb-2 flex items-start">
                         <svg class="w-4 h-4 mr-1 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                         <div>
                             <span class="font-bold">學習建議：</span><br>
-                            <span>雖然以下章節依「掌握度百分比」由低至高排列，但仍建議您按照<span class="text-cyan-400 font-bold">CH1 → CH10</span>的順序閱讀，可更完整建立學習脈絡與邏輯架構。</span>
+                            <span>雖然以下章節依「掌握度百分比」由低至高排列，但仍建議您準備<span class="text-cyan-400 font-bold">「TIMS行銷企劃教材與題庫」</span>時，按照<span class="text-cyan-400 font-bold">CH1 → CH10</span>的順序閱讀，可更完整建立學習脈絡與邏輯架構。</span>
                         </div>
                     </div>
                 `;
@@ -927,7 +1016,7 @@
                             <p class="text-gray-500 mt-2">（滿分 100 分）</p>
                         </div>
 
-                        <!-- 調整後的：各領域掌握度分析 (整體章節補強優先級) - 新增青色光暈 -->
+                        <!-- ** 區塊順序：各領域掌握度分析 (上方)** -->
                         <div class="text-left mb-8 p-4 bg-[#1a1a2e] rounded-xl border border-cyan-500/20 shadow-neon-cyan">
                             <!-- 標題強化 (已收斂光暈) -->
                             <h2 class="text-xl md:text-2xl font-extrabold text-cyan-400 mb-4 pb-2 title-glow flex items-center">
@@ -944,9 +1033,8 @@
                             ${chapterOverviewHtml}
                         </div>
                         <!-- END OF 各領域掌握度分析 -->
-
-
-                        <!-- 四大能力分類區塊 (已改名) - 新增青色光暈 -->
+                        
+                        <!-- 行銷企劃就業方向 (下方) -->
                         <div class="text-left mb-8 p-4 bg-[#1a1a2e] rounded-xl border border-cyan-500/20 shadow-neon-cyan">
                             <!-- 標題強化 (已收斂光暈) -->
                             <h2 class="text-xl md:text-2xl font-extrabold text-cyan-400 mb-4 pb-2 title-glow flex items-center">
@@ -954,13 +1042,14 @@
                                 行銷企劃就業方向
                             </h2>
                             
-                            <!-- 新增就業方向說明 (已優化排版) -->
-                            ${careerGuidanceHtml}
+                            <!-- 推薦就業方向 -->
+                            ${recommendedCareerHtml} 
                             
                             <div id="competency-list">
                                 ${competencyHtml}
                             </div>
                         </div>
+
 
                         <button id="${RETRY_BUTTON_ID}" class="futuristic-button">
                             返回首頁
