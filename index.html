@@ -190,7 +190,8 @@
         <!-- 容器置中 -->
         <div class="flex items-center justify-center max-w-2xl mx-auto h-full">
             <!-- Logo 尺寸縮小至 24px -->
-            <img src="https://i.postimg.cc/7Ly3JFYs/TIMS-Logo-png.png" alt="台灣行銷科學學會 Logo" class="max-w-[24px] h-auto object-contain logo-glow transition-transform duration-500 mr-2">
+            <!-- 修正：使用使用者提供的 Logo URL，並增加備用圖片 -->
+            <img src="https://i.postimg.cc/7Ly3JFYs/TIMS-Logo-png.png" alt="台灣行銷科學學會 Logo" class="max-w-[24px] h-auto object-contain logo-glow transition-transform duration-500 mr-2" onerror="this.onerror=null; this.src='https://placehold.co/24x24/00FFFF/130E20?text=TIMS';">
             
             <div class="flex flex-col items-start leading-none justify-center">
                 <!-- 修正：中文標題放大到 text-lg，與英文保持平衡對齊 -->
@@ -209,7 +210,6 @@
         // Google Forms 設定
         // ----------------------------------------------------
         // IMPORTANT: 請替換為您 Google Form 的提交 URL！
-        // 提交表單後，會被導向 Thank You 頁面，請用該頁面的 URL 替換
         const GOOGLE_SHEETS_ENDPOINT = 'https://docs.google.com/forms/d/e/1FAIpQLSc5CAo2pEY-pdHkZeYtQ2M6cm4p-uN1RVMeTiBHEhhG0AskeA/formResponse';
         
         // IMPORTANT: 您提供的 Google Form Entry ID 對應表
@@ -246,7 +246,33 @@
             'Q22_Score': 'entry.580939618',  
             'Q23_Score': 'entry.1251641209', 
             'Q24_Score': 'entry.213150979',  
-            'Q25_Score': 'entry.1030397303'  
+            'Q25_Score': 'entry.1030397303',
+            /* 25 個計時欄位 ID */
+            'Q1_Time': 'entry.809175797',
+            'Q2_Time': 'entry.1329737924',
+            'Q3_Time': 'entry.507264124',
+            'Q4_Time': 'entry.1488548361',
+            'Q5_Time': 'entry.1268313674',
+            'Q6_Time': 'entry.1099004357',
+            'Q7_Time': 'entry.1597608065',
+            'Q8_Time': 'entry.1176607886',
+            'Q9_Time': 'entry.966200193',
+            'Q10_Time': 'entry.1557561984',
+            'Q11_Time': 'entry.1687382849',
+            'Q12_Time': 'entry.1211135265',
+            'Q13_Time': 'entry.1971082687',
+            'Q14_Time': 'entry.675305634',
+            'Q15_Time': 'entry.1480558540',
+            'Q16_Time': 'entry.1343428474',
+            'Q17_Time': 'entry.155048244',
+            'Q18_Time': 'entry.1508543493',
+            'Q19_Time': 'entry.1562849729',
+            'Q20_Time': 'entry.1295203278',
+            'Q21_Time': 'entry.1733441242',
+            'Q22_Time': 'entry.808384353',
+            'Q23_Time': 'entry.2058739568',
+            'Q24_Time': 'entry.1067950769',
+            'Q25_Time': 'entry.1850841709'
         };
         // ----------------------------------------------------
 
@@ -346,7 +372,9 @@
             currentIndex: 0,        // 當前題號索引
             answers: new Array(QUIZ_DATA.length).fill(null), // 儲存使用者答案 (直接儲存分數 4, 2, 1)
             userName: '',           // 用戶姓名
-            userEmail: ''           // 用戶 Email
+            userEmail: '',          // 用戶 Email
+            startTime: null,        // 每題開始時間
+            timingRecords: new Array(QUIZ_DATA.length).fill(0) // 25 題的作答時間（秒）
         };
 
         const CONTENT_ID = 'content';
@@ -427,9 +455,17 @@
                 if (!element) return;
 
                 const questionElement = element.closest('.question-block');
-                // 確保這裡使用 10 作為 radix
                 const originalIndex = parseInt(questionElement.getAttribute('data-original-index'), 10);
                 const score = parseInt(element.getAttribute('data-score'), 10);
+                const currentTime = Date.now();
+                
+                // *** 停止計時並記錄作答時間 ***
+                if (quizState.startTime !== null) {
+                    const elapsedTime = (currentTime - quizState.startTime) / 1000; // 轉換為秒
+                    quizState.timingRecords[originalIndex] = Math.round(elapsedTime * 10) / 10; // 儲存到小數點一位
+                    quizState.startTime = null; // 重置計時器
+                }
+
 
                 // 移除所有選項的選中狀態
                 const options = questionElement.querySelectorAll('.futuristic-option');
@@ -479,8 +515,8 @@
                         <div class="text-left mb-6">
                             <h2 class="text-lg font-semibold text-cyan-400 mb-2">:: 資料登錄 ::</h2>
                             <div class="space-y-3">
-                                <input type="text" id="user-name" placeholder="你的名字" class="futuristic-input" required>
-                                <input type="email" id="user-email" placeholder="聯繫 E-mail" class="futuristic-input" required>
+                                <input type="text" id="user-name" placeholder="你的名字" class="futuristic-input" required value="${quizState.userName}">
+                                <input type="email" id="user-email" placeholder="聯繫 E-mail" class="futuristic-input" required value="${quizState.userEmail}">
                                 <p id="validation-message" class="text-sm text-red-500 hidden mt-2">請確認所有欄位已填寫，且 E-mail 格式正確。</p>
                             </div>
                         </div>
@@ -523,6 +559,7 @@
                                             為<span class="text-orange-400 font-bold">TIMS行銷企劃證照</span>準備，讓你精準了解哪個章節是你的天生強項，哪個章節又是補強重點！
                                         </div>
                                     </div>
+                                
                                 </li>
                             </ul>
                             <!-- 結束清單優化 -->
@@ -569,6 +606,8 @@
 
                 quizState.currentIndex = 0;
                 quizState.answers.fill(null); // 重置答案
+                quizState.timingRecords.fill(0); // 重置計時紀錄
+
                 renderQuizScreen();
             } catch (e) {
                 displayError("開始測驗初始化錯誤", e.message);
@@ -585,6 +624,10 @@
 
                 const currentItem = quizState.currentQuiz[quizState.currentIndex];
                 if (!currentItem) return; // 防止越界
+
+                // *** 啟動計時器 ***
+                quizState.startTime = Date.now();
+
 
                 const totalQuestions = quizState.currentQuiz.length;
                 const currentNumber = quizState.currentIndex + 1;
@@ -749,7 +792,7 @@
             if (score <= minScore) return minPR;
             if (score >= maxScore) return maxPR;
 
-            // 線性插值: PR = minPR + (Score - minScore) * (PR_Range / Score_Range)
+            // 線性插值: PR = minPR + (score - minScore) * (PR_Range / Score_Range)
             const prValue = minPR + (score - minScore) * ((maxPR - minPR) / (maxScore - minScore));
             return Math.min(maxPR, Math.round(prValue)); // 確保不超過 99
         }
@@ -903,6 +946,7 @@
          * @param {Object} results - 測驗結果
          */
         function submitResultsToSheets(results) {
+            // 這是一個 placeholder URL，避免提交錯誤
             if (GOOGLE_SHEETS_ENDPOINT === 'YOUR_GOOGLE_FORM_SUBMIT_URL_HERE') {
                 console.warn("Google Sheets Endpoint is not set. Skipping data submission.");
                 return;
@@ -928,16 +972,25 @@
                     if (comp.compName === '評估績效並調整') formData.append(GOOGLE_FORM_ENTRIES.comp4_Eval, comp.averageMastery);
                 });
 
-                // Q1-Q25 原始作答分數 (固定順序)
-                // 這裡必須確保所有 QUIZ_DATA 的題目都被包含，即使答案是 null
+                // Q1-Q25 原始作答分數和時間 (固定順序)
                 for(let i = 0; i < QUIZ_DATA.length; i++) {
                     const score = quizState.answers[i] !== null ? quizState.answers[i] : 0;
-                    const entryKey = `Q${i + 1}_Score`;
-                    const entryId = GOOGLE_FORM_ENTRIES[entryKey];
-                    if (entryId) {
-                        formData.append(entryId, score); 
+                    const time = quizState.timingRecords[i] !== 0 ? quizState.timingRecords[i] : 0;
+                    
+                    // 提交分數
+                    const entryIdScore = GOOGLE_FORM_ENTRIES[`Q${i + 1}_Score`];
+                    if (entryIdScore) {
+                        formData.append(entryIdScore, score); 
                     } else {
-                        console.warn(`Missing Entry ID for ${entryKey}. Skipping.`);
+                        // 移除 warn，避免在客戶端 console 產生過多訊息
+                    }
+
+                    // 提交時間
+                    const entryIdTime = GOOGLE_FORM_ENTRIES[`Q${i + 1}_Time`];
+                    if (entryIdTime) {
+                        formData.append(entryIdTime, time); 
+                    } else {
+                        // 移除 warn
                     }
                 }
 
