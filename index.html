@@ -28,9 +28,8 @@
             background-color: #130E20; /* 深紫色/深藍色背景 */
             color: #E0E0E0; /* 淺色字體，高對比 */
             background-attachment: fixed;
-            /* 修正：精確計算 Header 高度 (約 5rem)，確保內容不被遮擋 */
+            /* 精確計算 Header 高度 (約 5rem)，確保內容不被遮擋 */
             padding-top: 5rem; 
-            /* 移除 body 預設邊距，改由內層 card 控制 */
             margin: 0;
             padding: 0;
         }
@@ -182,37 +181,40 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* PDF 匯出專用分頁標記 */
+        /* Modal 動畫效果 */
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .modal-animate {
+            animation: modalFadeIn 0.3s ease-out forwards;
+        }
+
+        /* PDF 匯出專用樣式 */
         .pdf-page {
             width: 100%;
-            page-break-after: always;
-            padding: 40px;
+            height: 1050px; /* 固定 A4 高度確保背景填滿 */
             background-color: #130E20;
-            color: #E0E0E0;
+            padding: 40px;
             box-sizing: border-box;
+            page-break-after: always;
+            position: relative;
         }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center">
 
-    <!-- Header 恢復為 Sticky 定位 -->
+    <!-- Header -->
     <header id="main-header" class="px-4 md:px-8">
         <!-- 容器置中 -->
         <div class="flex items-center justify-between max-w-2xl mx-auto h-full">
             <div class="flex items-center">
-                <!-- Logo 尺寸縮小至 24px -->
-                <!-- 修正：使用使用者提供的 Logo URL，並增加備用圖片 -->
                 <img src="https://i.postimg.cc/7Ly3JFYs/TIMS-Logo-png.png" alt="台灣行銷科學學會 Logo" class="max-w-[24px] h-auto object-contain logo-glow transition-transform duration-500 mr-2" onerror="this.onerror=null; this.src='https://placehold.co/24x24/00FFFF/130E20?text=TIMS';">
-                
                 <div class="flex flex-col items-start leading-none justify-center">
-                    <!-- 修正：中文標題放大到 text-lg，與英文保持平衡對齊 -->
                     <h1 class="text-lg md:text-xl font-extrabold text-cyan-400 whitespace-nowrap tracking-wide">TIMS行銷天分測評</h1>
-                    <!-- 英文副標題縮小為 10px -->
                     <p class="text-[10px] font-light text-gray-400 mt-0.5 whitespace-nowrap tracking-wider">:: Marketing Talent Assessment ::</p>
                 </div>
             </div>
-            
-            <!-- 語言切換按鈕 -->
             <button id="lang-toggle" class="futuristic-button p-2 text-xs h-8 whitespace-nowrap" onclick="window.toggleLanguage()">
                 English
             </button>
@@ -225,7 +227,6 @@
     <script>
         // ----------------------------------------------------
         // 解決 ReferenceError: toggleLanguage is not defined
-        // 將 toggleLanguage 函數提升到全局作用域
         // ----------------------------------------------------
         window.toggleLanguage = function() {
             if (window._quizApp && window._quizApp.toggleLanguageInternal) {
@@ -235,88 +236,44 @@
             }
         };
 
-        // ----------------------------------------------------
-        // IFFE 確保所有核心變數和函式立即被定義
-        // ----------------------------------------------------
         (function() {
-            // *** CRITICAL FIX: 初始化全域物件，防止 undefined 錯誤 ***
+            // *** 初始化全域物件 ***
             window._quizApp = {};
 
             // ----------------------------------------------------
             // Google Forms 設定
             // ----------------------------------------------------
-            // IMPORTANT: 請替換為您 Google Form 的提交 URL！
             const GOOGLE_SHEETS_ENDPOINT = 'https://docs.google.com/forms/d/e/1FAIpQLSc5CAo2pEY-pdHkZeYtQ2M6cm4p-uN1RVMeTiBHEhhG0AskeA/formResponse';
             
-            // IMPORTANT: 您提供的 Google Form Entry ID 對應表 (FIXED)
             const GOOGLE_FORM_ENTRIES = {
                 'userName': 'entry.1538359173',
                 'userEmail': 'entry.1736498959',
                 'totalScore': 'entry.1898927306',
                 'prValue': 'entry.986302164',
-                'comp1_Insight': 'entry.1080358045', // 洞察市場與消費者
-                'comp2_Strategy': 'entry.331054747',  // 擬定行銷策略
-                'comp3_Design': 'entry.737005771',    // 設計行銷活動內容
-                'comp4_Eval': 'entry.724149395',      // 評估績效並調整
-                // Q Score (FIXED - Updated to latest list)
-                'Q1_Score': 'entry.1319188217',
-                'Q2_Score': 'entry.1494380504',
-                'Q3_Score': 'entry.1749728186',
-                'Q4_Score': 'entry.1437952355',
-                'Q5_Score': 'entry.1979278572',
-                'Q6_Score': 'entry.1962531825',
-                'Q7_Score': 'entry.1923508806',
-                'Q8_Score': 'entry.719846926',
-                'Q9_Score': 'entry.1044140532',
-                'Q10_Score': 'entry.2001370142',
-                'Q11_Score': 'entry.1254892165',
-                'Q12_Score': 'entry.1880255022', 
-                'Q13_Score': 'entry.1560865525', 
-                'Q14_Score': 'entry.637078334',  
-                'Q15_Score': 'entry.582890733',  
-                'Q16_Score': 'entry.1025051972', 
-                'Q17_Score': 'entry.1574032741', 
-                'Q18_Score': 'entry.1289641297', 
-                'Q19_Score': 'entry.991719753',  
-                'Q20_Score': 'entry.60587435',   
-                'Q21_Score': 'entry.605527488',  
-                'Q22_Score': 'entry.580939618',  
-                'Q23_Score': 'entry.1251641209', 
-                'Q24_Score': 'entry.213150979',  
+                'comp1_Insight': 'entry.1080358045', 
+                'comp2_Strategy': 'entry.331054747',  
+                'comp3_Design': 'entry.737005771',    
+                'comp4_Eval': 'entry.724149395',      
+                'Q1_Score': 'entry.1319188217', 'Q2_Score': 'entry.1494380504', 'Q3_Score': 'entry.1749728186',
+                'Q4_Score': 'entry.1437952355', 'Q5_Score': 'entry.1979278572', 'Q6_Score': 'entry.1962531825',
+                'Q7_Score': 'entry.1923508806', 'Q8_Score': 'entry.719846926', 'Q9_Score': 'entry.1044140532',
+                'Q10_Score': 'entry.2001370142', 'Q11_Score': 'entry.1254892165', 'Q12_Score': 'entry.1880255022', 
+                'Q13_Score': 'entry.1560865525', 'Q14_Score': 'entry.637078334', 'Q15_Score': 'entry.582890733', 
+                'Q16_Score': 'entry.1025051972', 'Q17_Score': 'entry.1574032741', 'Q18_Score': 'entry.1289641297', 
+                'Q19_Score': 'entry.991719753',  'Q20_Score': 'entry.60587435',   'Q21_Score': 'entry.605527488',  
+                'Q22_Score': 'entry.580939618',  'Q23_Score': 'entry.1251641209', 'Q24_Score': 'entry.213150979',  
                 'Q25_Score': 'entry.1030397303',
-                /* Q Time (FIXED - Updated to latest user request) */
-                'Q1_Time': 'entry.809175797',
-                'Q2_Time': 'entry.1329737924',
-                'Q3_Time': 'entry.507264124',
-                'Q4_Time': 'entry.1488548361',
-                'Q5_Time': 'entry.1268313674',
-                'Q6_Time': 'entry.1099004357',
-                'Q7_Time': 'entry.1597608065',
-                'Q8_Time': 'entry.1176607886',
-                'Q9_Time': 'entry.966200193',
-                'Q10_Time': 'entry.1557561984',
-                'Q11_Time': 'entry.1687382849',
-                'Q12_Time': 'entry.1211135265',
-                'Q13_Time': 'entry.1971082687',
-                'Q14_Time': 'entry.675305634',
-                'Q15_Time': 'entry.1480558540',
-                'Q16_Time': 'entry.1343428474',
-                'Q17_Time': 'entry.155048244',
-                'Q18_Time': 'entry.1508543493',
-                'Q19_Time': 'entry.1562849729',
-                'Q20_Time': 'entry.1295203278',
-                'Q21_Time': 'entry.1733441242',
-                'Q22_Time': 'entry.808384353',
-                'Q23_Time': 'entry.2058739568',
-                'Q24_Time': 'entry.1067950769',
+                'Q1_Time': 'entry.809175797', 'Q2_Time': 'entry.1329737924', 'Q3_Time': 'entry.507264124',
+                'Q4_Time': 'entry.1488548361', 'Q5_Time': 'entry.1268313674', 'Q6_Time': 'entry.1099004357',
+                'Q7_Time': 'entry.1597608065', 'Q8_Time': 'entry.1176607886', 'Q9_Time': 'entry.966200193',
+                'Q10_Time': 'entry.1557561984', 'Q11_Time': 'entry.1687382849', 'Q12_Time': 'entry.1211135265',
+                'Q13_Time': 'entry.1971082687', 'Q14_Time': 'entry.675305634', 'Q15_Time': 'entry.1480558540',
+                'Q16_Time': 'entry.1343428474', 'Q17_Time': 'entry.155048244', 'Q18_Time': 'entry.1508543493',
+                'Q19_Time': 'entry.1562849729', 'Q20_Time': 'entry.1295203278', 'Q21_Time': 'entry.1733441242',
+                'Q22_Time': 'entry.808384353', 'Q23_Time': 'entry.2058739568', 'Q24_Time': 'entry.1067950769',
                 'Q25_Time': 'entry.1850841709'
             };
-            // ----------------------------------------------------
 
-
-            // ----------------------------------------------------
-            // 核心題庫資料 (共 25 題) - FIXED: 刪除英文選項中的註解
-            // ----------------------------------------------------
             const QUIZ_DATA = [
                 { "chapterId": "CH1", "chapterName": "行銷源典", "question": "你如何看待「買一送一」的促銷優惠所帶來的營收增長？", "en_question": "What is your view on the revenue growth generated by a 'Buy One, Get One Free' (BOGO) promotion?", "imageUrl": "https://i.postimg.cc/fLGwYWL8/wei-ming-ming-1.jpg", "options": [ { "text": "這是暫時的手段，顧客是否還願意回購才是真正的關鍵。", "en_text": "It is a temporary tactic; the true key lies in whether it fosters long-term customer repeat purchases.", "score": 4 }, { "text": "有效的短期戰術，創造消費者願意支付的價值。", "en_text": "An effective short-term tactic that creates value customers are willing to pay for.", "score": 2 }, { "text": "這是必要的價格讓利，能確最短時間內創造大量營收。", "en_text": "This is a necessary price compromise to ensure large short-term revenue.", "score": 1 } ] },
                 { "chapterId": "CH1", "chapterName": "行銷源典", "question": "有一位主管說：「本次母親節檔期促銷方案，讓我們的按摩椅大熱銷，這代表我們行銷做得很好。」你對於這段話的理解是？", "en_question": "A manager states: 'The Mother's Day promotion led to massive sales of our massage chairs, proving our marketing was excellent.' What is your interpretation of this statement?", "imageUrl": "https://i.postimg.cc/bvRFjp4x/wei-ming-ming-2.jpg", "options": [ { "text": "不認同，因真正的成功關鍵於能否建立品牌長期價值與顧客忠誠度。", "en_text": "Disagree. The true key to success lies in building long-term brand equity and customer loyalty.", "score": 4 }, { "text": "持保留態度。但代表我們至少成功讓消費者願意付費購買，確保產品在市場上有一定競爭力。", "en_text": "Maintain reservations. It shows we successfully motivated purchase, ensuring some market competitiveness in the short term.", "score": 2 }, { "text": "認同，這可能代表我們的定價或促銷策略成功，創造了價格優勢。", "en_text": "Agree. This likely means our pricing or promotion strategy succeeded in creating a price advantage.", "score": 1 } ] },
@@ -340,7 +297,7 @@
                 { "chapterId": "CH7", "chapterName": "定價策略", "question": "在決定一個產品價格時，你認為最關鍵的考量點是？", "en_question": "When determining the price for a product, what do you consider to be the single most crucial factor?", "imageUrl": "https://i.postimg.cc/j5ggLvxj/wei-ming-ming-20.jpg", "options": [ { "text": "顧客認為這個產品或服務值多少錢。", "en_text": "What the customer perceives the product or service is worth.", "score": 4 }, { "text": "製作這個產品的總成本是多少，然後加上合理的利潤。", "en_text": "The total cost of manufacturing the product, plus a reasonable profit margin.", "score": 2 }, { "text": "競爭對手的價格是多少，我只要比他們低一點。", "en_text": "Competitors' prices, ensuring ours is slightly lower.", "score": 1 } ] },
                 { "chapterId": "CH8", "chapterName": "推廣策略", "question": "如果你要舉辦手搖飲料店的「開幕活動」，以下哪一種促銷策略是你最傾向的?", "en_question": "If you are organizing a 'grand opening event' for a bubble tea shop, which promotional strategy do you most prefer for building long-term customer relationships?", "imageUrl": "https://i.postimg.cc/d1HHLnsk/wei-ming-ming-21.jpg", "options": [ { "text": "加入會員後，可集點紅利回饋", "en_text": "Offering loyalty points/rewards upon membership sign-up.", "score": 4 }, { "text": "買飲料送折價券 (下次使用)", "en_text": "Giving a discount coupon for the next purchase when a drink is bought.", "score": 2 }, { "text": "熱門飲品買一送一活動", "en_text": "A 'Buy One, Get One Free' promotion on popular drinks.", "score": 1 } ] },
                 { "chapterId": "CH8", "chapterName": "推廣策略", "question": "你覺得「廣告」跟「媒體」是否有差別?", "en_question": "From a marketing communications perspective, do you believe there is a fundamental difference between 'Advertising' and 'Media'?", "imageUrl": "https://i.postimg.cc/gJSSn4zw/wei-ming-ming-22.jpg", "options": [ { "text": "兩者有明顯差別", "en_text": "Yes, there is a clear distinction.", "score": 4 }, { "text": "兩者有部分重疊", "en_text": "Yes, they have some overlap.", "score": 2 }, { "text": "幾乎沒有差別", "en_text": "No, they are almost the same.", "score": 1 } ] },
-                { "chapterId": "CH8", "chapterName": "推廣策略", "question": "如果你是手搖飲料品牌行銷經理，你會期望用什麼管道推播公司開發的新產品正式發售？", "en_question": "As a marketing manager for a bubble tea brand, which channel would you prioritize for announcing the official launch of a new product?", "imageUrl": "https://i.postimg.cc/7h5B77hq/wei-ming-ming-23.jpg", "options": [ { "text": "透過自己建立的官方社群曝光", "en_text": "Exposure through our own established official social media channels.", "score": 4 }, { "text": "具公信力高的媒體進行報導", "en_text": "Coverage by highly reputable media outlets.", "score": 2 }, { "text": "人流量較高的戶外電子看板", "en_text": "Outdoor digital billboards in high-traffic areas.", "score": 1 } ] },
+                { "chapterId": "CH8", "chapterName": "推廣策略", "question": "如果你是手搖飲料品牌行銷經理，你會期望用什麼管道推播公司開發的新產品？", "en_question": "As a marketing manager for a bubble tea brand, which channel would you prioritize for announcing the official launch of a new product?", "imageUrl": "https://i.postimg.cc/7h5B77hq/wei-ming-ming-23.jpg", "options": [ { "text": "透過自己建立的官方社群曝光", "en_text": "Exposure through our own established official social media channels.", "score": 4 }, { "text": "具公信力高的媒體進行報導", "en_text": "Coverage by highly reputable media outlets.", "score": 2 }, { "text": "人流量較高的戶外電子看板", "en_text": "Outdoor digital billboards in high-traffic areas.", "score": 1 } ] },
                 { "chapterId": "CH9", "chapterName": "通路策略", "question": "「源家」是你在經營手工水餃品牌，賣點訴求就是手工家鄉風味，全台僅一家經營，至今為止生意都很好. 假如今天有企業想投資你生產製作「加工冷凍水餃」擴大銷售量，你的反應是？", "en_question": "Your 'Origin Family' brand specializes in handmade dumplings, emphasizing authentic, home-style taste, and operates only one successful shop. If a corporation offers investment to mass-produce 'processed frozen dumplings' for sales expansion, what is your response?", "imageUrl": "https://i.postimg.cc/j2D8NN2x/wei-ming-ming-24.jpg", "options": [ { "text": "不合作，忠於原本的手工堅持，不生產冷凍水餃。", "en_text": "Decline the partnership to maintain the handmade commitment and original authenticity.", "score": 4 }, { "text": "積極合作，擴大市場規模，將產品推向更廣泛的消費族群。", "en_text": "Actively collaborate to expand the market scale and reach a wider consumer base.", "score": 2 }, { "text": "可以合作，但僅以「源家」品牌名稱開發「非水餃品類」冷凍加工食品。", "en_text": "Agree to collaborate, but only to develop 'non-dumpling' frozen processed foods under the 'Yuan Family' brand.", "score": 1 } ] },
                 { "chapterId": "CH9", "chapterName": "通路策略", "question": "一瓶礦泉水在便利商店賣 20 元，但是在百貨公司可以賣 40 元，你會如何解釋這現象？", "en_question": "A bottle of mineral water is NT$20 at a convenience store but NT$40 at a department store. How do you primarily explain this pricing difference?", "imageUrl": "https://i.postimg.cc/HnrS55nk/wei-ming-ming-25.jpg", "options": [ { "text": "因百貨公司為產品創造不同的品牌價值。", "en_text": "The department store creates different perceived value and consumption context for the product.", "score": 4 }, { "text": "因百貨公司的上架費用比便利商店高。", "en_text": "The department store has higher shelf/listing fees than the convenience store.", "score": 2 }, { "text": "因在百貨公司內競爭品牌相對較少。", "en_text": "There are relatively fewer competing brands within the department store.", "score": 1 } ] }
             ];
@@ -352,195 +309,19 @@
                 '評估績效並調整': ['CH10']
             };
 
-            const COMPETENCY_ICONS = {
-                '洞察市場與消費者': `<svg class="w-5 h-5 mr-2 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>`,
-                '擬定行銷策略': `<svg class="w-5 h-5 mr-2 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 2m0 0l-2-2m2 2v2M9.69 19L2 12l7.69-7M14.31 5L22 12l-7.69 7"></path></svg>`,
-                '設計行銷活動內容': `<svg class="w-5 h-5 mr-2 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>`,
-                '評估績效並調整': `<svg class="w-5 h-5 mr-2 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M17 14h-7m5 4h-5m7 2H7a2 2 0 01-2-2V5a2 2 0 012-2h10a2 2 0 012 2v14a2 2 0 01-2 2z"/></svg>`
-            };
-
             const CAREER_GUIDANCE_DATA = {
-                '洞察市場與消費者': {
-                    icon: COMPETENCY_ICONS['洞察市場與消費者'],
-                    focus: '資料收集、競品分析、消費者洞察、策略前置研究',
-                    roles: [ '市場研究員：專門負責市場調查、量化／質化研究、競品研究。', '行銷分析師：利用數據分析市場趨勢、客戶行為與產品績效。', '商業分析師：從商業與策略角度解析市場與產業動態。' ]
-                },
-                '擬定行銷策略': {
-                    icon: COMPETENCY_ICONS['擬定行銷策略'],
-                    focus: '品牌定位、目標客群、策略規劃、訊息架構',
-                    roles: [ '行銷企劃專員：負責制定行銷主軸、年度企劃、品牌溝通架構。', '品牌經理：掌握品牌策略方向、定位與整體市場操作。', '內容策略師：規劃品牌內容主題、溝通語調與受眾策略。' ]
-                },
-                '設計行銷活動內容': {
-                    icon: COMPETENCY_ICONS['設計行銷活動內容'],
-                    focus: '活動企劃、內容創作、通路選擇、跨部門執行',
-                    roles: [ '活動企劃：設計線上線下活動，負責執行與成效。', '社群經營：為不同平台打造貼文、短片、互動內容。', '整合行銷企劃：整合廣告、社群、公關與通路活動。' ]
-                },
-                '評估績效並調整': {
-                    icon: COMPETENCY_ICONS['評估績效並調整'],
-                    focus: 'KPI追蹤、數據解讀、成效檢討、優化建議',
-                    roles: [ '數據行銷專員：分析廣告投放成效、優化轉換。', '成效分析專員：負責活動、媒體、數據的整體回顧分析。', 'CRM / 成效優化專員：透過會員數據優化活動與再行銷策略。' ]
-                }
+                '洞察市場與消費者': { focus: '資料收集、競品分析、消費者洞察、策略前置研究', roles: ['市場研究員：專門負責市場調查、量化／質化研究、競品研究。', '行銷分析師：利用數據分析市場趨勢、客戶行為與產品績效。', '商業分析師：從商業與策略角度解析市場與產業動態。'] },
+                '擬定行銷策略': { focus: '品牌定位、目標客群、策略規劃、訊息架構', roles: ['行銷企劃專員：負責制定行銷主軸、年度企劃、品牌溝通架構。', '品牌經理：掌握品牌策略方向、定位與整體市場操作。', '內容策略師：規劃品牌內容主題、溝通語調與受眾策略。'] },
+                '設計行銷活動內容': { focus: '活動企劃、內容創作、通路選擇、跨部門執行', roles: ['活動企劃：設計線上線下活動，負責執行與成效。', '社群經營：為不同平台打造貼文、短片、互動內容。', '整合行銷企劃：整合廣告、社群、公關與通路活動。'] },
+                '評估績效並調整': { focus: 'KPI追蹤、數據解讀、成效檢討、優化建議', roles: ['數據行銷專員：分析廣告投放成效、優化轉換。', '成效分析專員：負責活動、媒體、數據的整體回顧分析。', 'CRM / 成效優化專員：透過會員數據優化活動與再行銷策略。'] }
             };
 
-
-            // ----------------------------------------------------
-            // 語言數據 (新增中英對照)
-            // ----------------------------------------------------
             const LANGUAGE_DATA = {
                 'zh': {
-                    app_title: "台灣行銷科學學會",
-                    app_subtitle: "你的行銷天分探索之旅",
-                    header_subtitle: ":: Marketing Talent Assessment ::",
-                    btn_lang: "English",
-                    btn_start: "開始測評",
-                    btn_next: "下一題",
-                    btn_unlock: "解鎖結果分析",
-                    btn_retry: "返回首頁",
-                    btn_export: "匯出行銷天分報告",
-                    data_entry_title: ":: 資料登錄 ::",
-                    placeholder_name: "你的名字",
-                    placeholder_email: "聯繫 E-mail",
-                    validation_msg: "請確認所有欄位已填寫，且 E-mail 格式正確。",
-                    guide_title: "測驗指南",
-                    guide_1_title: "探索天分：",
-                    guide_1_content: "透過 25 題測評，我們將量化你的<span class='text-orange-400 font-bold'>行銷天分值</span>，並轉換為未來職涯方向的建議。",
-                    guide_2_title: "直覺優先：",
-                    guide_2_content: "<span class='text-gray-300'>本測評無關你過去的專業或工作背景！</span> <span class='text-orange-400 font-bold'>請憑藉你的第一觀點或直覺來作答。</span>",
-                    guide_3_title: "認證前哨戰：",
-                    guide_3_content: "為<span class='text-orange-400 font-bold'>TIMS行銷企劃證照</span>準備，讓你精準了解哪個章節是你的天生強項，哪個章節又是補強重點！",
-                    quiz_progress: "任務進度",
-                    quiz_progress_q: "題",
-                    quiz_image_alt: "題目示意圖",
-                    system_error: "系統錯誤 (SYSTEM ERROR)",
-                    error_no_detail: "無詳細錯誤資訊。",
-                    validation_select_option: "請先選擇一個選項！",
-                    loading_title: "數據矩陣分析中...",
-                    loading_subtitle: "正在解析您的潛能指標，請稍候。",
-                    loading_delay: "預計延遲：",
-                    time_sec: "秒",
-                    result_title: ":: 測驗結果分析報告 ::",
-                    score_label_prefix: "的行銷天分值：",
-                    score_label_suffix: "（滿分 100 分）",
-                    pr_wins: "（贏過 ",
-                    pr_testers: "% 的測驗者）",
-                    mastery_section_title: "各領域掌握度分析",
-                    mastery_high: "💡 掌握度高：",
-                    mastery_high_desc: "代表您的直覺觀點與該章節的核心概念高度契合，未來閱讀教材時會有更強的「共鳴感」與「回饋感」。",
-                    mastery_low: "📉 掌握度低：",
-                    mastery_low_desc: "這可能代表您的既有觀念與該章節的知識點存在落差，是您準備認證考試時，最需要加強複習和避免「快速遺忘」的領域！",
-                    career_section_title: "行銷企劃就業方向",
-                    career_recommendation: "推薦就業方向：",
-                    competency_focus: "能力重點",
-                    competency_roles: "適合職缺",
-                    competency_details_title: "涵蓋之章節掌握百分比",
-                    // 章節名稱翻譯（用於結果頁面）
-                    chapters: {
-                        "CH1": "行銷源典", "CH2": "市場分析", "CH3": "消費者行為", "CH4": "行銷研究", "CH5": "產品策略", 
-                        "CH6": "品牌經營", "CH7": "定價策略", "CH8": "推廣策略", "CH9": "通路策略", "CH10": "行銷績效KPI"
-                    },
-                    // 能力名稱翻譯（用於 Competency Name 查找）
-                    "洞察市場與消費者": "洞察市場與消費者",
-                    "擬定行銷策略": "擬定行銷策略",
-                    "設計行銷活動內容": "設計行銷活動內容",
-                    "評估績效並調整": "評估績效並調整",
-                    // Learning Advice Key 翻譯
-                    "learning_advice_title": "學習與補強建議",
-                    "learning_advice_content": "雖然章節依掌握度由低到高排列，但建議您按順序 (CH1 → CH10) 研讀 <span class='text-cyan-400 font-bold'>「TIMS行銷企劃教材與題庫」</span>，以建立完整的行銷知識框架。"
+                    app_title: "台灣行銷科學學會", app_subtitle: "你的行銷天分探索之旅", header_subtitle: ":: Marketing Talent Assessment ::", btn_lang: "English", btn_start: "開始測評", btn_next: "下一題", btn_unlock: "解鎖結果分析", btn_retry: "返回首頁", btn_export: "匯出行銷天分報告", data_entry_title: ":: 資料登錄 ::", placeholder_name: "你的名字", placeholder_email: "聯繫 E-mail", validation_msg: "請確認所有欄位已填寫，且 E-mail 格式正確。", guide_title: "測驗指南", guide_1_title: "探索天分：", guide_1_content: "透過 25 題測評，我們將量化你的<span class='text-orange-400 font-bold'>行銷天分值</span>，並轉換為未來職涯方向的建議。", guide_2_title: "直覺優先：", guide_2_content: "<span class='text-gray-300'>本測評無關你過去的專業或工作背景！</span> <span class='text-orange-400 font-bold'>請憑藉你的第一觀點或直覺來作答。</span>", guide_3_title: "認證前哨戰：", guide_3_content: "為<span class='text-orange-400 font-bold'>TIMS行銷企劃證照</span>準備，讓你精準了解哪個章節是你的天生強項，哪個章節又是補強重點！", quiz_progress: "任務進度", quiz_progress_q: "題", quiz_image_alt: "題目示意圖", system_error: "系統錯誤 (SYSTEM ERROR)", error_no_detail: "無詳細錯誤資訊。", validation_select_option: "請先選擇一個選項！", loading_title: "數據矩陣分析中...", loading_subtitle: "正在解析您的潛能指標，請稍候。", loading_delay: "預計延遲：", time_sec: "秒", result_title: ":: 測驗結果分析報告 ::", score_label_prefix: "的行銷天分值：", score_label_suffix: "（滿分 100 分）", pr_wins: "（贏過 ", pr_testers: "% 的測驗者）", mastery_section_title: "各領域掌握度分析", mastery_high: "💡 掌握度高：", mastery_high_desc: "代表您的直覺觀點與該章節的核心概念高度契合，未來閱讀教材時會有更強的「共鳴感」與「回饋感」。", mastery_low: "📉 掌握度低：", mastery_low_desc: "這可能代表您的既有觀念與該章節的知識點存在落差，是您準備認證考試時，最需要加強複習和避免「快速遺忘」的領域！", career_section_title: "行銷企劃就業方向", career_recommendation: "推薦就業方向：", competency_focus: "能力重點", competency_roles: "適合職缺", competency_details_title: "涵蓋之章節掌握百分比", learning_advice_title: "學習與補強建議", learning_advice_content: "雖然章節依掌握度由低到高排列，但建議您按順序 (CH1 → CH10) 研讀 <span class='text-cyan-400 font-bold'>「TIMS行銷企劃教材與題庫」</span>，以建立完整的行銷知識框架。", chapters: { "CH1": "行銷源典", "CH2": "市場分析", "CH3": "消費者行為", "CH4": "行銷研究", "CH5": "產品策略", "CH6": "品牌經營", "CH7": "定價策略", "CH8": "推廣策略", "CH9": "通路策略", "CH10": "行銷績效KPI" }, "洞察市場與消費者": "洞察市場與消費者", "擬定行銷策略": "擬定行銷策略", "設計行銷活動內容": "設計行銷活動內容", "評估績效並調整": "評估績效並調整", "reminder_title": "重要提醒", "reminder_content": "測評資料僅限當次瀏覽。<br><span class='text-cyan-400 font-bold underline'>請務必截圖或拍照儲存此分析報告</span>，否則重新整理或關閉視窗後，結果將無法再次找回。", "reminder_btn": "我知道了"
                 },
                 'en': {
-                    app_title: "Taiwan Institute of Marketing Science",
-                    app_subtitle: "Your Marketing Talent Assessment",
-                    header_subtitle: ":: Marketing Talent Assessment ::",
-                    btn_lang: "中文",
-                    btn_start: "Start Assessment",
-                    btn_next: "Next",
-                    btn_unlock: "Unlock Results",
-                    btn_retry: "Back to Home",
-                    btn_export: "Export Report",
-                    data_entry_title: ":: Data Registration ::",
-                    placeholder_name: "Your Name",
-                    placeholder_email: "Contact E-mail",
-                    validation_msg: "Please ensure all fields are filled and email format is correct.",
-                    guide_title: "Assessment Guide",
-                    guide_1_title: "Talent Discovery:",
-                    guide_1_content: "Through 25 questions, we quantify your <span class='text-orange-400 font-bold'>Marketing Talent Value</span> and provide career path recommendations.",
-                    guide_2_title: "Intuition First:",
-                    guide_2_content: "<span class='text-gray-300'>This assessment is unrelated to your professional background!</span> <span class='text-orange-400 font-bold'>Please answer based on your first instinct.</span>",
-                    guide_3_title: "Certification Prelude:",
-                    guide_3_content: "Prepare for the <span class='text-orange-400 font-bold'>TIMS Marketing Planner Certification</span> by identifying your strengths and focus areas.",
-                    quiz_progress: "Task Progress",
-                    quiz_progress_q: "Q",
-                    quiz_image_alt: "Question Illustration",
-                    system_error: "System Error (GLOBAL)",
-                    error_no_detail: "No detailed error information available.",
-                    validation_select_option: "Please select an option first!",
-                    loading_title: "Analyzing Data Matrix...",
-                    loading_subtitle: "Processing your potential index, please wait.",
-                    loading_delay: "Estimated delay: ",
-                    time_sec: "s",
-                    result_title: ":: Assessment Results Analysis ::",
-                    score_label_prefix: "'s Marketing Talent Score:",
-                    score_label_suffix: "(Max 100 Points)",
-                    pr_wins: "(Outperformed ",
-                    pr_testers: "% of testers)",
-                    mastery_section_title: "Domain Mastery Analysis",
-                    mastery_high: "💡 High Mastery:",
-                    mastery_high_desc: "Indicates your intuition aligns highly with the core concepts of this domain, providing strong resonance for future study.",
-                    mastery_low: "📉 Low Mastery:",
-                    mastery_low_desc: "This area suggests a gap between your current perception and core knowledge points. This is your priority area for review.",
-                    career_section_title: "Marketing Career Direction",
-                    career_recommendation: "Recommended Career Focus:",
-                    competency_focus: "Focus Areas",
-                    competency_roles: "Suitable Roles",
-                    competency_details_title: "Chapter Mastery Percentage",
-                    // 章節名稱翻譯（用於結果頁面）
-                    chapters: {
-                        "CH1": "Marketing Genesis", "CH2": "Market Analysis", "CH3": "Consumer Behavior", "CH4": "Marketing Research", "CH5": "Product Strategy", 
-                        "CH6": "Brand Management", "CH7": "Pricing Strategy", "CH8": "Promotion Strategy", "CH9": "Channel Strategy", "CH10": "Marketing KPI"
-                    },
-                    // 能力名稱翻譯（用於 Competency Name 查找）
-                    "洞察市場與消費者": "Insight & Consumers",
-                    "擬定行銷策略": "Strategy Formulation",
-                    "設計行銷活動內容": "Activity Design",
-                    "評估績效並調整": "Performance Evaluation",
-                    // Learning Advice Key 翻譯 (FIXED)
-                    "learning_advice_title": "Learning & Improvement Advice",
-                    "learning_advice_content": "Although chapters are listed by mastery (low to high), it is recommended to study the <span class='text-cyan-400 font-bold'>'TIMS Marketing Planner Textbook and Question Bank'</span> sequentially from CH1 → CH10 to build a complete framework.",
-                    // 職涯描述翻譯 (FIXED)
-                    "career_details": {
-                        '洞察市場與消費者': {
-                            focus: 'Data Collection, Competitive Analysis, Consumer Insight, Strategic Research',
-                            roles: [
-                                'Market Researcher: Specialized in market surveys, quantitative/qualitative research, and competitive intelligence.',
-                                'Marketing Analyst: Uses data to analyze market trends, customer behavior, and product performance.',
-                                'Business Analyst: Analyzes market and industry dynamics from a business and strategic perspective.'
-                            ]
-                        },
-                        '擬定行銷策略': {
-                            focus: 'Brand Positioning, Target Audience, Strategy Planning, Message Architecture',
-                            roles: [
-                                'Marketing Planner: Responsible for setting marketing themes, annual plans, and brand communication frameworks.',
-                                'Brand Manager: Controls brand strategic direction, positioning, and overall market execution.',
-                                'Content Strategist: Plans brand content themes, tone of voice, and audience strategy.'
-                            ]
-                        },
-                        '設計行銷活動內容': {
-                            focus: 'Event Planning, Content Creation, Channel Selection, Cross-functional Execution',
-                            roles: [
-                                'Event Planner: Designs online and offline events, responsible for execution and effectiveness.',
-                                'Community Manager: Creates posts, short videos, and interactive content for various social platforms.',
-                                'Integrated Marketing Planner: Integrates advertising, social media, public relations, and channel activities.'
-                            ]
-                        },
-                        '評估績效並調整': {
-                            focus: 'KPI Tracking, Data Interpretation, Performance Review, Optimization Suggestions',
-                            roles: [
-                                'Data Marketing Specialist: Analyzes advertising campaign effectiveness and optimizes conversion.',
-                                'Performance Analyst: Responsible for overall review of activities, media, and data effectiveness.',
-                                'CRM / Optimization Specialist: Uses customer data to optimize campaigns and re-marketing strategies.'
-                            ]
-                        }
-                    }
+                    app_title: "TIMS", app_subtitle: "Marketing Assessment", header_subtitle: ":: Marketing Talent Assessment ::", btn_lang: "中文", btn_start: "Start Assessment", btn_next: "Next", btn_unlock: "Unlock Results", btn_retry: "Back to Home", btn_export: "Export Report", data_entry_title: ":: Data Registration ::", placeholder_name: "Your Name", placeholder_email: "Contact E-mail", validation_msg: "Please ensure all fields are filled.", guide_title: "Guide", quiz_progress: "Progress", quiz_progress_q: "Q", result_title: ":: Assessment Results Analysis ::", score_label_prefix: "'s Marketing Talent Score:", score_label_suffix: "(Max 100 Points)", pr_wins: "(Outperformed ", pr_testers: "% of testers)", mastery_section_title: "Domain Mastery Analysis", mastery_high: "💡 High Mastery:", mastery_high_desc: "Indicates your intuition aligns highly with core concepts.", mastery_low: "📉 Low Mastery:", mastery_low_desc: "Indicates areas needing review.", career_section_title: "Marketing Career Direction", career_recommendation: "Recommended Career Focus:", competency_focus: "Focus Areas", competency_roles: "Suitable Roles", competency_details_title: "Chapter Mastery Percentage", learning_advice_title: "Learning & Improvement Advice", learning_advice_content: "Although chapters are listed by mastery (low to highs), it is recommended to study the <span class='text-cyan-400 font-bold'>'TIMS Marketing Planner Textbook and Question Bank'</span> sequentially from CH1 → CH10 to build a complete framework.", chapters: { "CH1": "Marketing Genesis", "CH2": "Market Analysis", "CH3": "Consumer Behavior", "CH4": "Marketing Research", "CH5": "Product Strategy", "CH6": "Brand Management", "CH7": "Pricing Strategy", "CH8": "Promotion Strategy", "CH9": "Channel Strategy", "CH10": "Marketing KPI" }, "洞察市場與消費者": "Insight & Consumers", "擬定行銷策略": "Strategy Formulation", "設計行銷活動內容": "Activity Design", "評估績效並調整": "Performance Evaluation", "reminder_title": "Important Reminder", "reminder_content": "Assessment data is for current session only.<br><span class='text-cyan-400 font-bold underline'>Please screenshot or take a photo to save this report</span>, as it cannot be retrieved after refreshing or closing the window.", "reminder_btn": "Got it", "career_details": { '洞察市場與消費者': { focus: 'Data Collection, Consumer Insight', roles: ['Market Researcher', 'Marketing Analyst'] }, '擬定行銷策略': { focus: 'Brand Positioning, Strategy Planning', roles: ['Marketing Planner', 'Brand Manager'] }, '設計行銷活動內容': { focus: 'Event Planning, Content Creation', roles: ['Event Planner', 'Community Manager'] }, '評估績效並調整': { focus: 'KPI Tracking, Performance Review', roles: ['Data Specialist', 'Performance Analyst'] } }
                 }
             };
 
@@ -549,14 +330,14 @@
             // 全域變數與狀態管理
             // ----------------------------------------------------
             let quizState = {
-                currentQuiz: [],        // 亂數排序後的題目陣列
-                currentIndex: 0,        // 當前題號索引
-                answers: new Array(QUIZ_DATA.length).fill(null), // 儲存使用者答案 (直接儲存分數 4, 2, 1)
-                userName: '',           // 用戶姓名
-                userEmail: '',          // 用戶 Email
-                startTime: null,        // 每題開始時間
-                timingRecords: new Array(QUIZ_DATA.length).fill(0), // 25 題的作答時間（秒）
-                language: 'zh' // 新增語言狀態：'zh' (中文, 預設) 或 'en' (英文)
+                currentQuiz: [],        
+                currentIndex: 0,        
+                answers: new Array(QUIZ_DATA.length).fill(null), 
+                userName: '',           
+                userEmail: '',          
+                startTime: null,        
+                timingRecords: new Array(QUIZ_DATA.length).fill(0), 
+                language: 'zh' 
             };
 
             const CONTENT_ID = 'content';
@@ -564,7 +345,6 @@
             const NEXT_BUTTON_ID = 'next-button';
             const RETRY_BUTTON_ID = 'retry-button';
             
-            // **固定呈現的順序 (已修正為最新的使用者需求)**
             const FIXED_COMPETENCY_ORDER = [
                 '洞察市場與消費者',
                 '擬定行銷策略',
@@ -576,80 +356,60 @@
             // 核心函式
             // ----------------------------------------------------
             
-            /**
-             * 處理語言切換 (FIXED: 更新按鈕文本)
-             */
+            function getPRValue(score) {
+                const minScore = 50;
+                const maxScore = 100;
+                const minPR = 1;
+                const maxPR = 99;
+                if (score <= minScore) return minPR;
+                if (score >= maxScore) return maxPR;
+                const prValue = minPR + (score - minScore) * ((maxPR - minPR) / (maxScore - minScore));
+                return Math.min(maxPR, Math.round(prValue));
+            }
+
             window._quizApp = {
                 toggleLanguageInternal: function() {
-                    // 切換語言狀態
                     const newLanguage = quizState.language === 'zh' ? 'en' : 'zh';
                     quizState.language = newLanguage;
                     
-                    // 獲取按鈕並更新文本
                     const langButton = document.getElementById('lang-toggle');
                     if (langButton) {
-                        // 確保切換後按鈕顯示的是「下一個」要切換的語言
                         langButton.textContent = LANGUAGE_DATA[newLanguage === 'zh' ? 'en' : 'zh'].btn_lang;
                     }
                     
-                    // 重新渲染當前畫面以應用新的語言
                     if (document.getElementById(START_BUTTON_ID)) {
                         renderStartScreen();
                     } else if (document.getElementById(NEXT_BUTTON_ID)) {
                         renderQuizScreen();
                     } else {
-                        // 如果在結果頁面，重新渲染結果
                         const resultDataElement = document.getElementById('result-data');
                         if (resultDataElement) {
                             const currentResults = JSON.parse(resultDataElement.textContent);
                             renderResultScreen(currentResults);
                         } else {
-                            renderStartScreen(); // 確保不會卡住
+                            renderStartScreen(); 
                         }
                     }
                 }
             };
 
 
-            /**
-             * 取得當前語言的文本
-             * @param {string} key 
-             * @returns {string}
-             */
             function getText(key) {
-                // 由於 quizState.language 已經是 'zh' 或 'en'，直接使用
-                // 如果當前語言沒有對應的 key，則退回中文 (zh)
                 const langData = LANGUAGE_DATA[quizState.language];
                 return langData && langData[key] !== undefined ? langData[key] : LANGUAGE_DATA['zh'][key] || key;
             }
 
-            /**
-             * 簡易 HTML 內容逸出，防止字串中包含的引號或特殊符號破壞 HTML 結構。
-             * @param {string} str
-             * @returns {string}
-             */
             function escapeHtml(str) {
                 if (typeof str !== 'string') return '';
                 return str.replace(/[&<>"']/g, function(m) {
-                    return {
-                        '&': '&amp;',
-                        '<': '&lt;',
-                        '>': '&gt;',
-                        '"': '&quot;',
-                        "'": '&#039;'
-                    }[m];
+                    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
                 });
             }
 
-            /**
-             * 顯示錯誤訊息 (用於捕捉靜默錯誤)
-             * @param {string} message - 錯誤訊息
-             * @param {string} detail - 錯誤詳細資訊
-             */
             function displayError(message, detail) {
                 const content = document.getElementById(CONTENT_ID);
                 if (content) {
-                    const localizedMessage = `
+                    content.innerHTML = `
                         <div class="futuristic-card text-center p-8 bg-red-900 border border-red-700">
                             <h1 class="text-3xl font-bold text-red-500 mb-4">${getText('system_error')}</h1>
                             <p class="text-red-400 mb-6">${message}</p>
@@ -657,16 +417,9 @@
                             <button class="futuristic-button mt-4" onclick="window.location.reload()">${getText('btn_retry')}</button>
                         </div>
                     `;
-                    content.innerHTML = localizedMessage;
-                } else {
-                    console.error("Critical Error: Cannot find content div.", message, detail);
                 }
             }
 
-            /**
-             * 亂數打亂陣列順序 (Fisher-Yates Shuffle)
-             * @param {Array} array
-             */
             function shuffleArray(array) {
                 for (let i = array.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
@@ -675,582 +428,9 @@
                 return array;
             }
 
-            /**
-             * 處理選項點擊事件 (使用 Event Delegation)
-             * @param {Event} event
-             */
-            function handleOptionClick(event) {
-                try {
-                    const element = event.target.closest('.futuristic-option');
-                    if (!element) return;
-
-                    const questionElement = element.closest('.question-block');
-                    const originalIndex = parseInt(questionElement.getAttribute('data-original-index'), 10);
-                    const score = parseInt(element.getAttribute('data-score'), 10);
-                    const currentTime = Date.now();
-                    
-                    // *** 停止計時並記錄作答時間 ***
-                    if (quizState.startTime !== null) {
-                        const elapsedTime = (currentTime - quizState.startTime) / 1000; // 轉換為秒
-                        quizState.timingRecords[originalIndex] = Math.round(elapsedTime * 10) / 10; // 儲存到小數點一位
-                        quizState.startTime = null; // 重置計時器
-                    }
-
-
-                    // 移除所有選項的選中狀態
-                    const options = questionElement.querySelectorAll('.futuristic-option');
-                    options.forEach(opt => opt.classList.remove('selected'));
-
-                    // 設定當前選項的選中狀態
-                    element.classList.add('selected');
-
-                    // 儲存答案 (直接儲存分數)
-                    quizState.answers[originalIndex] = score;
-
-                    // 啟用下一題按鈕
-                    const nextButton = document.getElementById(NEXT_BUTTON_ID);
-                    if (nextButton) {
-                        nextButton.disabled = false;
-                    }
-
-                } catch (e) {
-                    displayError("選項點擊處理錯誤", e.message);
-                }
-            }
-            
-            /**
-             * 渲染開始畫面
-             */
-            function renderStartScreen() {
-                try {
-                    const content = document.getElementById(CONTENT_ID);
-                    if (!content) throw new Error("Content container not found.");
-                    
-                    // 清空測驗狀態，以防用戶返回重測
-                    quizState.answers.fill(null); 
-                    quizState.currentIndex = 0; 
-
-                    // 替換圖示為「數位晶片/分析」意象
-                    const GuideIcon = `<svg class="w-5 h-5 mr-2 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2h10a2 2 0 012 2v2m-7-7V3"></path></svg>`; // 數據板/晶片
-
-                    content.innerHTML = `
-                        <div class="futuristic-card text-center p-8">
-                            
-                            <!-- 修正：品牌標語分行顯示 -->
-                            <p class="text-lg text-gray-300 mb-6">
-                                <span class="block text-xl font-bold text-cyan-400 mb-1">${getText('app_title')}</span> 
-                                <span class="block text-base">${getText('app_subtitle')}</span>
-                            </p>
-
-                            <div class="text-left mb-6">
-                                <h2 class="text-lg font-semibold text-cyan-400 mb-2">${getText('data_entry_title')}</h2>
-                                <div class="space-y-3">
-                                    <input type="text" id="user-name" placeholder="${getText('placeholder_name')}" class="futuristic-input" required value="${quizState.userName}">
-                                    <input type="email" id="user-email" placeholder="${getText('placeholder_email')}" class="futuristic-input" required value="${quizState.userEmail}">
-                                    <p id="validation-message" class="text-sm text-red-500 hidden mt-2">${getText('validation_msg')}</p>
-                                </div>
-                            </div>
-
-                            <div class="text-left bg-[#130E20] p-6 rounded-xl mb-8 border border-cyan-500/20 shadow-neon-cyan">
-                                <!-- 修正：指南標題精簡 -->
-                                <p class="font-semibold text-orange-400 mb-4 flex items-center text-lg">
-                                    ${GuideIcon}
-                                    ${getText('guide_title')}
-                                </p>
-                                <!-- 優化清單排版 -->
-                                <ul class="text-sm text-gray-300 space-y-4 ml-2"> 
-                                    <li class="flex items-start">
-                                        <span class="text-cyan-400 font-bold mr-3 mt-0.5 text-xl leading-none">•</span>
-                                        <div class="flex-1">
-                                            <span class="text-cyan-400 font-bold text-lg">${getText('guide_1_title')}</span> 
-                                            <!-- 修正：內文替換為最新的需求 -->
-                                            <div class="mt-1 text-gray-300">${getText('guide_1_content')}</div>
-                                        </div>
-                                    </li>
-                                    <li class="flex items-start">
-                                        <span class="text-cyan-400 font-bold mr-3 mt-0.5 text-xl leading-none">•</span>
-                                        <div class="flex-1">
-                                            <!-- 修正：標題替換 -->
-                                            <span class="text-cyan-400 font-bold text-lg">${getText('guide_2_title')}</span> 
-                                            <!-- 修正：內文替換並保持顏色交換的邏輯 -->
-                                            <div class="mt-1">
-                                                ${getText('guide_2_content')}
-                                            </div>
-                                        </div>
-                                    </li>
-                                    <li class="flex items-start">
-                                        <span class="text-cyan-400 font-bold mr-3 mt-0.5 text-xl leading-none">•</span>
-                                        <div class="flex-1">
-                                            <!-- 修正：標題替換 -->
-                                            <span class="text-cyan-400 font-bold text-lg">${getText('guide_3_title')}</span> 
-                                            <!-- 修正：內文替換為最新的需求 -->
-                                            <div class="mt-1 text-gray-300">${getText('guide_3_content')}</div>
-                                        </div>
-                                    
-                                    </li>
-                                </ul>
-                                <!-- 結束清單優化 -->
-                            </div>
-
-                            <button id="${START_BUTTON_ID}" class="futuristic-button text-lg">
-                                ${getText('btn_start')}
-                            </button>
-                        </div>
-                    `;
-                    document.getElementById(START_BUTTON_ID).addEventListener('click', () => {
-                        const name = document.getElementById('user-name').value.trim();
-                        const email = document.getElementById('user-email').value.trim();
-                        const validationMsg = document.getElementById('validation-message');
-                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-                        if (name === '' || !emailRegex.test(email)) {
-                            validationMsg.classList.remove('hidden');
-                        } else {
-                            validationMsg.classList.add('hidden');
-                            // 儲存用戶資料到全域狀態
-                            quizState.userName = name;
-                            quizState.userEmail = email;
-                            startQuiz();
-                        }
-                    });
-                    
-                    // 確保 Header 上的語言按鈕文本正確
-                    const langButton = document.getElementById('lang-toggle');
-                    if (langButton) {
-                        langButton.textContent = LANGUAGE_DATA[quizState.language === 'zh' ? 'en' : 'zh'].btn_lang;
-                    }
-
-
-                } catch (e) {
-                    displayError("渲染開始畫面錯誤", e.message);
-                }
-            }
-
-            /**
-             * 開始測驗，亂數打亂題目並渲染第一頁
-             */
-            function startQuiz() {
-                try {
-                    // 複製 QUIZ_DATA 並為每個題目產生隨機選項順序
-                    quizState.currentQuiz = shuffleArray([...QUIZ_DATA].map((q, originalIndex) => {
-                        // 複製選項並對其進行亂序 (FIXED: 選項順序隨機化)
-                        const shuffledOptions = shuffleArray([...q.options]);
-                        return { ...q, originalIndex, shuffledOptions };
-                    }));
-
-                    quizState.currentIndex = 0;
-                    quizState.answers.fill(null); // 重置答案
-                    quizState.timingRecords.fill(0); // 重置計時紀錄
-
-                    renderQuizScreen();
-                } catch (e) {
-                    displayError("開始測驗初始化錯誤", e.message);
-                }
-            }
-
-            /**
-             * 渲染測驗頁面
-             */
-            function renderQuizScreen() {
-                try {
-                    const content = document.getElementById(CONTENT_ID);
-                    if (!content) throw new Error("Content container not found.");
-
-                    const currentItem = quizState.currentQuiz[quizState.currentIndex];
-                    if (!currentItem) return; // 防止越界
-
-                    // *** 啟動計時器 ***
-                    quizState.startTime = Date.now();
-
-
-                    const totalQuestions = quizState.currentQuiz.length;
-                    const currentNumber = quizState.currentIndex + 1;
-                    const progress = (currentNumber / totalQuestions) * 100;
-                    const originalIndex = currentItem.originalIndex; // 用來儲存答案的索引
-                    
-                    // 選擇正確的題目文字
-                    const questionText = quizState.language === 'zh' ? currentItem.question : currentItem.en_question || currentItem.question;
-                    
-                    // 構建選項 HTML
-                    const optionsHtml = currentItem.shuffledOptions.map((option, idx) => {
-                        // 選擇正確的選項文字 (FIXED: 使用 option.en_text 進行翻譯)
-                        const optionText = quizState.language === 'zh' ? option.text : option.en_text || option.text;
-                        const savedScore = quizState.answers[originalIndex];
-                        const isSelected = savedScore === option.score;
-
-                        return `
-                            <div 
-                                class="futuristic-option rounded-xl p-4 mb-3 text-left cursor-pointer ${isSelected ? 'selected' : ''}"
-                                data-score="${option.score}"
-                                data-original-index="${originalIndex}"
-                            >
-                                <span class="font-semibold mr-2 text-cyan-400">${String.fromCharCode(65 + idx)}.</span> ${escapeHtml(optionText)}
-                            </div>
-                        `;
-                    }).join('');
-
-                    content.innerHTML = `
-                        <div class="futuristic-card question-block p-6 md:p-8" data-original-index="${originalIndex}">
-                            <div class="flex justify-between items-center mb-4">
-                                <!-- 任務進度下移，避免被 Header 遮擋 -->
-                                <span class="text-sm font-semibold text-orange-400 mt-2">
-                                    ${getText('quiz_progress')}
-                                    <span class="text-gray-200 ml-1">(${currentNumber} / ${totalQuestions} ${getText('quiz_progress_q')})</span>
-                                </span>
-                            </div>
-                            
-                            <div class="progress-bar-container mb-6">
-                                <div class="progress-bar" style="width: ${progress.toFixed(2)}%;"></div>
-                            </div>
-
-                            <!-- 題目使用 text-amber-300 呈現 -->
-                            <h2 class="text-xl font-bold text-amber-300 mb-6">Q${currentNumber}. ${escapeHtml(questionText)}</h2>
-
-                            <!-- 題目圖片顯示區塊 (已移除圖片優化邏輯) -->
-                            <div class="mb-6 text-center">
-                                <img 
-                                    id="current-quiz-image"
-                                    src="${currentItem.imageUrl}" 
-                                    alt="${getText('quiz_image_alt')}" 
-                                    class="w-full h-auto object-contain rounded-lg shadow-lg shadow-cyan-500/20"
-                                    onerror="this.onerror=null; this.src='https://placehold.co/600x300/e0e0e0/505050?text=Image+Load+Error';"
-                                >
-                            </div>
-                            <!-- 結束圖片區塊 -->
-
-                            <div class="space-y-3 mb-8 options-container">
-                                ${optionsHtml}
-                            </div>
-
-                            <div class="flex justify-end">
-                                <button id="${NEXT_BUTTON_ID}" class="futuristic-button" ${quizState.answers[originalIndex] === null ? 'disabled' : ''}>
-                                    ${currentNumber === totalQuestions ? getText('btn_unlock') : getText('btn_next')}
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                    document.getElementById(NEXT_BUTTON_ID).addEventListener('click', nextQuestion);
-                    
-                } catch (e) {
-                    displayError("渲染測驗畫面錯誤", e.message);
-                }
-            }
-
-            /**
-             * 處理下一題/查看結果按鈕
-             */
-            function nextQuestion() {
-                try {
-                    const currentItem = quizState.currentQuiz[quizState.currentIndex];
-                    const originalIndex = currentItem.originalIndex;
-
-                    // 檢查是否已作答
-                    if (quizState.answers[originalIndex] === null) {
-                        // 使用內聯訊息代替 alert
-                        const nextButton = document.getElementById(NEXT_BUTTON_ID);
-                        if (nextButton) {
-                            nextButton.textContent = getText('validation_select_option');
-                            setTimeout(() => {
-                                 nextButton.textContent = (quizState.currentIndex < quizState.currentQuiz.length - 1) ? getText('btn_next') : getText('btn_unlock');
-                            }, 1500);
-                        }
-                        return;
-                    }
-
-                    if (quizState.currentIndex < quizState.currentQuiz.length - 1) {
-                        quizState.currentIndex++;
-                        renderQuizScreen();
-                    } else {
-                        // *** 關鍵修改：進入 Loading 畫面 ***
-                        renderLoadingScreen();
-                    }
-                    
-                    // *** 修正：使用即時跳轉，提高穩定性 ***
-                    window.scrollTo(0, 0);
-
-                } catch (e) {
-                    displayError("處理下一題錯誤", e.message);
-                }
-            }
-
-            /**
-             * 渲染 Loading 讀取畫面
-             */
-            function renderLoadingScreen() {
-                try {
-                    const content = document.getElementById(CONTENT_ID);
-                    if (!content) throw new Error("Content container not found.");
-                    
-                    // 隨機延遲時間 (3000ms 到 5000ms)
-                    const minDelay = 3000;
-                    const maxDelay = 5000;
-                    const randomDelay = Math.floor(Math.random() * (maxDelay - minDelay + 1)) + minDelay;
-
-                    content.innerHTML = `
-                        <div class="futuristic-card text-center p-12 h-96 flex flex-col items-center justify-center">
-                            <div class="spinner mb-8"></div>
-                            <h2 class="text-2xl font-bold text-cyan-400 mb-2 shadow-neon-cyan">
-                                ${getText('loading_title')}
-                            </h2>
-                            <p class="text-sm text-gray-400">
-                                ${getText('loading_subtitle')}
-                            </p>
-                            <p class="text-xs text-gray-600 mt-6">
-                                ${getText('loading_delay')}${(randomDelay / 1000).toFixed(1)} ${getText('time_sec')}
-                            </p>
-                        </div>
-                    `;
-
-                    // 設置延遲，延遲結束後呼叫真正的結果計算
-                    setTimeout(() => {
-                        calculateResults();
-                    }, randomDelay);
-
-                } catch (e) {
-                    displayError("計算結果錯誤", e.message);
-                }
-            }
-
-            /**
-             * 計算 PR 值 (百分位排名)
-             * 將分數 50-100 線性映射到 PR 值 1%-99%
-             * @param {number} score - 行銷天分值 (50-100)
-             * @returns {number} PR value (1-99)
-             */
-            function getPRValue(score) {
-                const minScore = 50;
-                const maxScore = 100;
-                const minPR = 1;
-                const maxPR = 99;
-
-                if (score <= minScore) return minPR;
-                if (score >= maxScore) return maxPR;
-
-                // 線性插值: PR = minPR + (score - minScore) * (PR_Range / Score_Range)
-                const prValue = minPR + (score - minScore) * ((maxPR - minPR) / (maxScore - minScore));
-                return Math.min(maxPR, Math.round(prValue)); // 確保不超過 99
-            }
-
-
-            /**
-             * 計算並顯示測驗結果
-             */
-            function calculateResults() {
-                try {
-                    const chapterScores = {};
-                    const chapterMaxScores = {};
-                    const chapterNames = {};
-                    let actualTotalScore = 0;
-                    
-                    // 1. 彙總章節分數
-                    QUIZ_DATA.forEach((question, originalIndex) => {
-                        const chapterId = question.chapterId;
-                        const chapterName = question.chapterName;
-                        const answeredScore = quizState.answers[originalIndex];
-
-                        // 確保章節初始化
-                        if (!chapterScores[chapterId]) {
-                            chapterScores[chapterId] = 0;
-                            chapterMaxScores[chapterId] = 0;
-                            chapterNames[chapterId] = question.chapterName;
-                        }
-
-                        // 該題滿分固定為 4 分
-                        const questionMaxScore = 4;
-                        chapterMaxScores[chapterId] += questionMaxScore;
-
-                        // 取得實際得分
-                        if (answeredScore !== null) {
-                            const score = answeredScore;
-                            chapterScores[chapterId] += score;
-                            actualTotalScore += score;
-                        }
-                    });
-
-
-                    // 2. 計算總分與天分值 (原始總分範圍 25-100)
-                    // 轉換公式: 50 + (實際總分 - 25) * (50 / 75)
-                    const marketingAptitudeValue = Math.round(50 + (actualTotalScore - 25) * (50 / 75));
-                    
-                    // 3. 計算 PR 值
-                    const prValue = getPRValue(marketingAptitudeValue);
-
-
-                    // 4. 計算章節掌握百分比 (Mastery Percentage)
-                    const chapterResults = Object.keys(chapterScores).map(chapterId => {
-                        const maxScore = chapterMaxScores[chapterId]; // 章節滿分
-                        const actualScore = chapterScores[chapterId]; // 章節實際得分
-
-                        // 防除以零錯誤
-                        const masteryPercentage = maxScore > 0 ? (actualScore / maxScore) * 100 : 0;
-
-                        return {
-                            chapterId: chapterId,
-                            chapterName: chapterNames[chapterId],
-                            masteryPercentage: Math.min(100, Math.round(masteryPercentage)) // 確保不超過 100%
-                        };
-                    });
-                    
-                    // --- NEW: 為整體章節概覽創建排序列表 (由低到高) ---
-                    const sortedChapterOverview = [...chapterResults].sort((a, b) => a.masteryPercentage - b.masteryPercentage);
-                    // ----------------------------------------------------
-
-
-                    // 5. 彙整並計算四大能力平均掌握百分比
-                    let competencyResults = Object.entries(COMPETENCY_MAPPING).map(([compName, chapterIds]) => {
-                        let totalMastery = 0;
-                        let count = 0;
-                        
-                        const detailedChapters = chapterResults
-                            .filter(cr => chapterIds.includes(cr.chapterId))
-                            .sort((a, b) => a.masteryPercentage - b.masteryPercentage); // 補強優先級排序 (章節內部)
-
-                        detailedChapters.forEach(chapter => {
-                            totalMastery += chapter.masteryPercentage;
-                            count++;
-                        });
-
-                        // 能力平均掌握百分比 (細項章節掌握百分比的平均)
-                        const averageMastery = count > 0 ? Math.round(totalMastery / count) : 0;
-                        
-                        return {
-                            compName,
-                            averageMastery,
-                            detailedChapters
-                        };
-                    });
-                    
-                    // 依照最新的固定順序排序四大能力
-                    competencyResults.sort((a, b) => {
-                        const indexA = FIXED_COMPETENCY_ORDER.indexOf(a.compName);
-                        const indexB = FIXED_COMPETENCY_ORDER.indexOf(b.compName);
-                        // 確保找不到的項目排在最後（理論上不會發生）
-                        if (indexA === -1 && indexB === -1) return 0;
-                        if (indexA === -1) return 1;
-                        if (indexB === -1) return -1;
-                        return indexA - indexB;
-                    });
-                    
-                    // 6. 找出得分最高的能力 (Highest Mastery Competency)
-                    let highestMasteryComp = { compName: '', averageMastery: -1 };
-                    
-                    // *** 修正平手邏輯：依 FIXED_COMPETENCY_ORDER 優先順序破局 ***
-                    for (const fixedName of FIXED_COMPETENCY_ORDER) {
-                        const comp = competencyResults.find(c => c.compName === fixedName);
-                        if (comp) {
-                            if (comp.averageMastery > highestMasteryComp.averageMastery) {
-                                // 發現更高分的能力，直接替換
-                                highestMasteryComp = comp;
-                            } else if (comp.averageMastery === highestMasteryComp.averageMastery) {
-                                // 分數相同，維持 FIXED_COMPETENCY_ORDER 的順序
-                                if (highestMasteryComp.compName === '') {
-                                    highestMasteryComp = comp; // 確保第一個最高分被賦值
-                                }
-                            }
-                        }
-                    }
-                    // ----------------------------------------------------
-
-
-                    const results = {
-                        totalScore: marketingAptitudeValue,
-                        prValue: prValue, // 新增 PR 值
-                        competencyResults: competencyResults,
-                        chapterResults: chapterResults, // 原始章節結果 (備用)
-                        sortedChapterOverview: sortedChapterOverview, // 新增排序過的章節總覽
-                        highestMasteryComp: highestMasteryComp // 新增最高得分的能力
-                    };
-                    
-                    // 7. 提交數據到 Google Sheets (非同步，不阻礙結果渲染)
-                    submitResultsToSheets(results);
-
-
-                    renderResultScreen(results);
-                    
-                    // *** 修正：使用即時跳轉，提高穩定性 ***
-                    window.scrollTo(0, 0);
-
-                } catch (e) {
-                    displayError("計算結果錯誤", e.message);
-                }
-            }
-            
-            /**
-             * 提交數據到 Google Sheets
-             * @param {Object} results - 測驗結果
-             */
-            function submitResultsToSheets(results) {
-                // 這是一個 placeholder URL，避免提交錯誤
-                if (GOOGLE_SHEETS_ENDPOINT === 'YOUR_GOOGLE_FORM_SUBMIT_URL_HERE') {
-                    console.warn("Google Sheets Endpoint is not set. Skipping data submission.");
-                    return;
-                }
-
-                try {
-                    // 準備要提交的數據
-                    const formData = new FormData();
-                    
-                    // 基礎用戶數據 (使用實際的 Entry ID)
-                    formData.append(GOOGLE_FORM_ENTRIES.userName, quizState.userName || 'N/A'); 
-                    formData.append(GOOGLE_FORM_ENTRIES.userEmail, quizState.userEmail || 'N/A'); 
-                    
-                    // 核心結果
-                    formData.append(GOOGLE_FORM_ENTRIES.totalScore, results.totalScore); // 總天分值
-                    formData.append(GOOGLE_FORM_ENTRIES.prValue, results.prValue);    // PR 值 (FIXED: 修正了變數名稱筆誤)
-
-                    // 四大能力結果 (使用實際的 Entry ID)
-                    results.competencyResults.forEach(comp => {
-                        if (comp.compName === '洞察市場與消費者') formData.append(GOOGLE_FORM_ENTRIES.comp1_Insight, comp.averageMastery);
-                        if (comp.compName === '擬定行銷策略') formData.append(GOOGLE_FORM_ENTRIES.comp2_Strategy, comp.averageMastery);
-                        if (comp.compName === '設計行銷活動內容') formData.append(GOOGLE_FORM_ENTRIES.comp3_Design, comp.averageMastery);
-                        if (comp.compName === '評估績效並調整') formData.append(GOOGLE_FORM_ENTRIES.comp4_Eval, comp.averageMastery);
-                    });
-
-                    // Q1-Q25 原始作答分數和時間 (FIXED: 確保 Time IDs 使用正確)
-                    for(let i = 0; i < QUIZ_DATA.length; i++) {
-                        const score = quizState.answers[i] !== null ? quizState.answers[i] : 0;
-                        const time = quizState.timingRecords[i] !== 0 ? quizState.timingRecords[i] : 0;
-                        
-                        // 提交分數
-                        const entryIdScore = GOOGLE_FORM_ENTRIES[`Q${i + 1}_Score`];
-                        if (entryIdScore) {
-                            formData.append(entryIdScore, score); 
-                        }
-
-                        // 提交時間
-                        const entryIdTime = GOOGLE_FORM_ENTRIES[`Q${i + 1}_Time`];
-                        if (entryIdTime) {
-                            formData.append(entryIdTime, time); 
-                        }
-                    }
-
-
-                    // 提交數據
-                    fetch(GOOGLE_SHEETS_ENDPOINT, {
-                        method: 'POST',
-                        body: formData,
-                        mode: 'no-cors' // 必須使用 no-cors 模式來提交 Google Forms
-                    })
-                    .then(response => {
-                        console.log("Data submitted successfully (via no-cors mode).");
-                    })
-                    .catch(error => {
-                        console.error("Error submitting data to Google Sheets:", error);
-                    });
-
-                } catch (e) {
-                    console.error("Error preparing data for submission:", e);
-                }
-            }
-            
-            /**
-             * 處理手風琴展開/收合
-             */
             function toggleAccordion(compName) {
                 try {
-                    // *** 修正: 檢查 compName 是否為空 ***
                     if (!compName) return; 
-
                     const compId = compName.replace(/\s/g, '-');
                     const contentElement = document.getElementById(`content-${compId}`);
                     const iconElement = document.getElementById(`icon-${compId}`);
@@ -1267,10 +447,249 @@
                 }
             }
 
-            /**
-             * 匯出測驗結果為 PDF (固定兩頁排版)
-             * @param {Object} results - 測驗結果
-             */
+            function handleOptionClick(event) {
+                try {
+                    const element = event.target.closest('.futuristic-option');
+                    if (!element) return;
+                    const questionElement = element.closest('.question-block');
+                    const originalIndex = parseInt(questionElement.getAttribute('data-original-index'), 10);
+                    const score = parseInt(element.getAttribute('data-score'), 10);
+                    const currentTime = Date.now();
+                    
+                    if (quizState.startTime !== null) {
+                        const elapsedTime = (currentTime - quizState.startTime) / 1000;
+                        quizState.timingRecords[originalIndex] = Math.round(elapsedTime * 10) / 10;
+                    }
+
+                    const options = questionElement.querySelectorAll('.futuristic-option');
+                    options.forEach(opt => opt.classList.remove('selected'));
+                    element.classList.add('selected');
+                    quizState.answers[originalIndex] = score;
+                    const nextButton = document.getElementById(NEXT_BUTTON_ID);
+                    if (nextButton) nextButton.disabled = false;
+                } catch (e) {
+                    displayError("選項點擊處理錯誤", e.message);
+                }
+            }
+
+            function showSaveReminderModal() {
+                const modal = document.createElement('div');
+                modal.id = 'save-reminder-modal';
+                modal.className = 'fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm';
+                modal.innerHTML = `
+                    <div class="futuristic-card max-w-sm w-full text-center border-orange-500 shadow-neon-orange modal-animate">
+                        <div class="flex justify-center mb-4 text-orange-400">
+                            <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        </div>
+                        <h2 class="text-xl font-bold text-orange-400 mb-4 tracking-wider">${getText('reminder_title')}</h2>
+                        <p class="text-gray-300 mb-6 text-sm leading-relaxed">${getText('reminder_content')}</p>
+                        <button class="futuristic-button w-full" onclick="document.getElementById('save-reminder-modal').remove()">${getText('reminder_btn')}</button>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+            
+            function renderStartScreen() {
+                try {
+                    const content = document.getElementById(CONTENT_ID);
+                    if (!content) return;
+                    quizState.answers.fill(null); 
+                    quizState.currentIndex = 0; 
+                    const GuideIcon = `<svg class="w-5 h-5 mr-2 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2h10a2 2 0 012 2v2m-7-7V3"></path></svg>`;
+
+                    content.innerHTML = `
+                        <div class="futuristic-card text-center p-8">
+                            <p class="text-lg text-gray-300 mb-6">
+                                <span class="block text-xl font-bold text-cyan-400 mb-1">${getText('app_title')}</span> 
+                                <span class="block text-base">${getText('app_subtitle')}</span>
+                            </p>
+                            <div class="text-left mb-6">
+                                <h2 class="text-lg font-semibold text-cyan-400 mb-2">${getText('data_entry_title')}</h2>
+                                <div class="space-y-3">
+                                    <input type="text" id="user-name" placeholder="${getText('placeholder_name')}" class="futuristic-input" required value="${quizState.userName}">
+                                    <input type="email" id="user-email" placeholder="${getText('placeholder_email')}" class="futuristic-input" required value="${quizState.userEmail}">
+                                    <p id="validation-message" class="text-sm text-red-500 hidden mt-2">${getText('validation_msg')}</p>
+                                </div>
+                            </div>
+                            <div class="text-left bg-[#130E20] p-6 rounded-xl mb-8 border border-cyan-500/20 shadow-neon-cyan">
+                                <p class="font-semibold text-orange-400 mb-4 flex items-center text-lg">
+                                    ${GuideIcon}
+                                    ${getText('guide_title')}
+                                </p>
+                                <ul class="text-sm text-gray-300 space-y-4 ml-2"> 
+                                    <li class="flex items-start">
+                                        <span class="text-cyan-400 font-bold mr-3 mt-0.5 text-xl leading-none">•</span>
+                                        <div class="flex-1">
+                                            <span class="text-cyan-400 font-bold text-lg">${getText('guide_1_title')}</span> 
+                                            <div class="mt-1 text-gray-300">${getText('guide_1_content')}</div>
+                                        </div>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-cyan-400 font-bold mr-3 mt-0.5 text-xl leading-none">•</span>
+                                        <div class="flex-1">
+                                            <span class="text-cyan-400 font-bold text-lg">${getText('guide_2_title')}</span> 
+                                            <div class="mt-1">${getText('guide_2_content')}</div>
+                                        </div>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-cyan-400 font-bold mr-3 mt-0.5 text-xl leading-none">•</span>
+                                        <div class="flex-1">
+                                            <span class="text-cyan-400 font-bold text-lg">${getText('guide_3_title')}</span> 
+                                            <div class="mt-1 text-gray-300">${getText('guide_3_content')}</div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                            <button id="${START_BUTTON_ID}" class="futuristic-button text-lg">${getText('btn_start')}</button>
+                        </div>
+                    `;
+                    document.getElementById(START_BUTTON_ID).addEventListener('click', () => {
+                        const name = document.getElementById('user-name').value.trim();
+                        const email = document.getElementById('user-email').value.trim();
+                        const validationMsg = document.getElementById('validation-message');
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (name === '' || !emailRegex.test(email)) validationMsg.classList.remove('hidden');
+                        else {
+                            validationMsg.classList.add('hidden');
+                            quizState.userName = name;
+                            quizState.userEmail = email;
+                            startQuiz();
+                        }
+                    });
+                    const langButton = document.getElementById('lang-toggle');
+                    if (langButton) langButton.textContent = LANGUAGE_DATA[quizState.language === 'zh' ? 'en' : 'zh'].btn_lang;
+                } catch (e) {
+                    displayError("渲染開始畫面錯誤", e.message);
+                }
+            }
+
+            function startQuiz() {
+                quizState.currentQuiz = shuffleArray([...QUIZ_DATA].map((q, originalIndex) => {
+                    const shuffledOptions = shuffleArray([...q.options]);
+                    return { ...q, originalIndex, shuffledOptions };
+                }));
+                quizState.currentIndex = 0;
+                quizState.answers.fill(null);
+                quizState.timingRecords.fill(0);
+                renderQuizScreen();
+            }
+
+            function renderQuizScreen() {
+                try {
+                    const content = document.getElementById(CONTENT_ID);
+                    if (!content) return;
+                    const currentItem = quizState.currentQuiz[quizState.currentIndex];
+                    if (!currentItem) return; 
+                    quizState.startTime = Date.now();
+                    const totalQuestions = quizState.currentQuiz.length;
+                    const currentNumber = quizState.currentIndex + 1;
+                    const progress = (currentNumber / totalQuestions) * 100;
+                    const originalIndex = currentItem.originalIndex;
+                    const questionText = quizState.language === 'zh' ? currentItem.question : currentItem.en_question || currentItem.question;
+                    const optionsHtml = currentItem.shuffledOptions.map((option, idx) => {
+                        const optionText = quizState.language === 'zh' ? option.text : option.en_text || option.text;
+                        const savedScore = quizState.answers[originalIndex];
+                        const isSelected = savedScore === option.score;
+                        return `
+                            <div class="futuristic-option rounded-xl p-4 mb-3 text-left cursor-pointer ${isSelected ? 'selected' : ''}"
+                                data-score="${option.score}" data-original-index="${originalIndex}">
+                                <span class="font-semibold mr-2 text-cyan-400">${String.fromCharCode(65 + idx)}.</span> ${escapeHtml(optionText)}
+                            </div>
+                        `;
+                    }).join('');
+
+                    content.innerHTML = `
+                        <div class="futuristic-card question-block p-6 md:p-8" data-original-index="${originalIndex}">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-sm font-semibold text-orange-400 mt-2">
+                                    ${getText('quiz_progress')} <span class="text-gray-200 ml-1">(${currentNumber} / ${totalQuestions} ${getText('quiz_progress_q')})</span>
+                                </span>
+                            </div>
+                            <div class="progress-bar-container mb-6"><div class="progress-bar" style="width: ${progress.toFixed(2)}%;"></div></div>
+                            <h2 class="text-xl font-bold text-amber-300 mb-6">Q${currentNumber}. ${escapeHtml(questionText)}</h2>
+                            <div class="mb-6 text-center">
+                                <img id="current-quiz-image" src="${currentItem.imageUrl}" alt="${getText('quiz_image_alt')}" class="w-full h-auto object-contain rounded-lg shadow-lg shadow-cyan-500/20" onerror="this.onerror=null; this.src='https://placehold.co/600x300/e0e0e0/505050?text=Image+Load+Error';">
+                            </div>
+                            <div class="space-y-3 mb-8 options-container">${optionsHtml}</div>
+                            <div class="flex justify-end">
+                                <button id="${NEXT_BUTTON_ID}" class="futuristic-button" ${quizState.answers[originalIndex] === null ? 'disabled' : ''}>
+                                    ${currentNumber === totalQuestions ? getText('btn_unlock') : getText('btn_next')}
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    document.getElementById(NEXT_BUTTON_ID).addEventListener('click', nextQuestion);
+                } catch (e) { displayError("渲染測驗畫面錯誤", e.message); }
+            }
+
+            function nextQuestion() {
+                const currentItem = quizState.currentQuiz[quizState.currentIndex];
+                const originalIndex = currentItem.originalIndex;
+                if (quizState.answers[originalIndex] === null) return;
+                if (quizState.currentIndex < quizState.currentQuiz.length - 1) {
+                    quizState.currentIndex++;
+                    renderQuizScreen();
+                } else renderLoadingScreen();
+                window.scrollTo(0, 0);
+            }
+
+            function renderLoadingScreen() {
+                const content = document.getElementById(CONTENT_ID);
+                content.innerHTML = `<div class="futuristic-card text-center p-12 h-96 flex flex-col items-center justify-center"><div class="spinner mb-8"></div><h2 class="text-2xl font-bold text-cyan-400 mb-2 shadow-neon-cyan">${getText('loading_title')}</h2><p class="text-sm text-gray-400">${getText('loading_subtitle')}</p></div>`;
+                setTimeout(calculateResults, 3000);
+            }
+
+            function calculateResults() {
+                const chapterScores = {};
+                const chapterMaxScores = {};
+                const chapterNames = {};
+                let actualTotalScore = 0;
+                QUIZ_DATA.forEach((question, originalIndex) => {
+                    const chapterId = question.chapterId;
+                    if (!chapterScores[chapterId]) { chapterScores[chapterId] = 0; chapterMaxScores[chapterId] = 0; chapterNames[chapterId] = question.chapterName; }
+                    chapterMaxScores[chapterId] += 4;
+                    const score = quizState.answers[originalIndex];
+                    if (score !== null) { chapterScores[chapterId] += score; actualTotalScore += score; }
+                });
+                const totalAptitudeValue = Math.round(50 + (actualTotalScore - 25) * (50 / 75));
+                const chapterResults = Object.keys(chapterScores).map(chapterId => ({
+                    chapterId: chapterId,
+                    chapterName: chapterNames[chapterId],
+                    masteryPercentage: Math.round((chapterScores[chapterId] / chapterMaxScores[chapterId]) * 100)
+                }));
+                const sortedChapterOverview = [...chapterResults].sort((a, b) => a.masteryPercentage - b.masteryPercentage);
+                let competencyResults = Object.entries(COMPETENCY_MAPPING).map(([compName, chapterIds]) => {
+                    const detailedChapters = chapterResults.filter(cr => chapterIds.includes(cr.chapterId));
+                    const averageMastery = Math.round(detailedChapters.reduce((sum, r) => sum + r.masteryPercentage, 0) / detailedChapters.length);
+                    return { compName, averageMastery, detailedChapters };
+                });
+                competencyResults.sort((a, b) => FIXED_COMPETENCY_ORDER.indexOf(a.compName) - FIXED_COMPETENCY_ORDER.indexOf(b.compName));
+                const highestMasteryComp = [...competencyResults].sort((a, b) => b.averageMastery - a.averageMastery)[0];
+
+                const results = { totalScore: totalAptitudeValue, prValue: getPRValue(totalAptitudeValue), competencyResults, sortedChapterOverview, highestMasteryComp };
+                submitResultsToSheets(results);
+                renderResultScreen(results);
+            }
+
+            function submitResultsToSheets(results) {
+                const formData = new FormData();
+                formData.append(GOOGLE_FORM_ENTRIES.userName, quizState.userName || 'N/A');
+                formData.append(GOOGLE_FORM_ENTRIES.userEmail, quizState.userEmail || 'N/A');
+                formData.append(GOOGLE_FORM_ENTRIES.totalScore, results.totalScore);
+                formData.append(GOOGLE_FORM_ENTRIES.prValue, results.prValue);
+                results.competencyResults.forEach(comp => {
+                    if (comp.compName === '洞察市場與消費者') formData.append(GOOGLE_FORM_ENTRIES.comp1_Insight, comp.averageMastery);
+                    if (comp.compName === '擬定行銷策略') formData.append(GOOGLE_FORM_ENTRIES.comp2_Strategy, comp.averageMastery);
+                    if (comp.compName === '設計行銷活動內容') formData.append(GOOGLE_FORM_ENTRIES.comp3_Design, comp.averageMastery);
+                    if (comp.compName === '評估績效並調整') formData.append(GOOGLE_FORM_ENTRIES.comp4_Eval, comp.averageMastery);
+                });
+                QUIZ_DATA.forEach((q, i) => {
+                    formData.append(GOOGLE_FORM_ENTRIES[`Q${i + 1}_Score`], quizState.answers[i] || 0);
+                    formData.append(GOOGLE_FORM_ENTRIES[`Q${i + 1}_Time`], quizState.timingRecords[i] || 0);
+                });
+                fetch(GOOGLE_SHEETS_ENDPOINT, { method: 'POST', body: formData, mode: 'no-cors' });
+            }
+
             function exportResultsToPDF(results) {
                 try {
                     const name = quizState.userName || 'Tester';
@@ -1305,10 +724,11 @@
                             </div>
                             ${results.sortedChapterOverview.map(c => {
                                 const color = c.masteryPercentage >= 80 ? '#65a30d' : (c.masteryPercentage >= 60 ? '#ca8a04' : '#dc2626');
+                                const localizedChapName = getText('chapters')[c.chapterId] || c.chapterName;
                                 return `
                                     <div style="margin-bottom: 10px; background: #2a2a44; padding: 10px; border-radius: 8px;">
                                         <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
-                                            <span>${c.chapterId} ${c.chapterName}</span>
+                                            <span>${c.chapterId} ${localizedChapName}</span>
                                             <span style="color: ${color}; font-weight: bold;">${c.masteryPercentage}%</span>
                                         </div>
                                         <div style="height: 8px; background: #334155; border-radius: 4px; overflow: hidden;">
@@ -1360,287 +780,108 @@
                 }
             }
 
-            /**
-             * 渲染結果頁面
-             * @param {Object} results - 測驗結果
-             */
             function renderResultScreen(results) {
-                try {
-                    const content = document.getElementById(CONTENT_ID);
-                    let scoreTextClass;
+                const content = document.getElementById(CONTENT_ID);
+                const scoreClass = results.totalScore >= 85 ? 'text-yellow-400 shadow-neon-orange/50' : (results.totalScore >= 65 ? 'text-cyan-400 shadow-neon-cyan/50' : 'text-red-500 shadow-neon-orange/50');
+                
+                const masteryListHtml = results.sortedChapterOverview.map(c => {
+                    const color = c.masteryPercentage >= 80 ? 'bg-lime-600' : (c.masteryPercentage >= 60 ? 'bg-yellow-600' : 'bg-red-600');
+                    const textColorClass = c.masteryPercentage >= 80 ? 'text-lime-400' : (c.masteryPercentage >= 60 ? 'text-yellow-400' : 'text-red-400');
+                    const localizedChapName = getText('chapters')[c.chapterId] || c.chapterName;
+                    return `
+                        <div class="mb-4 p-2 bg-[#2a2a44] rounded-lg border border-cyan-500/10">
+                            <div class="flex justify-between mb-1 text-sm"><span>${c.chapterId} ${escapeHtml(localizedChapName)}</span><span class="font-bold ${textColorClass}">${c.masteryPercentage}%</span></div>
+                            <div class="mastery-bar-outer"><div class="mastery-bar-inner ${color}" style="width: ${c.masteryPercentage}%"></div></div>
+                        </div>
+                    `;
+                }).join('');
 
-                    if (results.totalScore >= 85) {
-                        scoreTextClass = 'text-yellow-400 shadow-neon-orange/50';
-                    } else if (results.totalScore >= 65) {
-                        scoreTextClass = 'text-cyan-400 shadow-neon-cyan/50';
-                    } else {
-                        scoreTextClass = 'text-red-500 shadow-neon-orange/50';
-                    }
-                    
-                    // --- 1. 動態生成推薦職涯區塊 ---
-                    const recommendedComp = results.highestMasteryComp;
-                    const recommendedGuide = recommendedComp.compName ? CAREER_GUIDANCE_DATA[recommendedComp.compName] : null;
-                    
-                    let recommendedCareerHtml = '';
-
-                    if (recommendedGuide) {
-                        const focusContent = quizState.language === 'zh' 
-                            ? recommendedGuide.focus 
-                            : LANGUAGE_DATA.en.career_details[recommendedComp.compName].focus;
-                        
-                        const rolesListHtml = quizState.language === 'zh'
-                            ? recommendedGuide.roles.map(role => `<li class="text-gray-300">${role}</li>`).join('')
-                            : LANGUAGE_DATA.en.career_details[recommendedComp.compName].roles.map(role => `<li class="text-gray-300">${role}</li>`).join('');
-
-                        recommendedCareerHtml = `
-                            <div class="bg-[#130E20] p-6 rounded-xl mb-6 border border-orange-500/30 shadow-neon-orange text-left">
-                                <h3 class="text-xl font-bold text-orange-400 mb-3 flex items-center">
-                                    <span class="title-glow">${getText('career_recommendation')}${getText(recommendedComp.compName)}</span>
-                                </h3>
-                                
-                                <div class="mb-4">
-                                    <span class="block text-cyan-400 font-bold text-sm mb-1">${getText('competency_focus')}：</span>
-                                    <span class="text-gray-300 ml-3">${escapeHtml(focusContent)}</span>
-                                </div>
-                                
-                                <div>
-                                    <span class="block text-cyan-400 font-bold text-sm mb-1">${getText('competency_roles')}：</span>
-                                    <ul class="list-disc list-inside ml-6 text-xs space-y-0.5">
-                                        ${rolesListHtml}
-                                    </ul>
-                                </div>
-                            </div>
-                        `;
-                    }
-
-                    // --- 2. 構建所有章節掌握度概覽 HTML ---
-                    const chapterOverviewHtml = results.sortedChapterOverview.map(chapter => {
-                        const percentage = chapter.masteryPercentage;
-                        let colorClass = 'bg-lime-600'; // 霓虹綠
-                        let textColorClass = 'text-lime-400';
-                        if (percentage < 60) {
-                            colorClass = 'bg-red-600'; // 霓虹紅
-                            textColorClass = 'text-red-400';
-                        } else if (percentage < 80) {
-                            colorClass = 'bg-yellow-600'; // 鮮黃色
-                            textColorClass = 'text-yellow-400';
-                        }
-                        const widthStyle = `width: ${Math.max(0, percentage)}%;`;
-                        
-                        const chapName = quizState.language === 'zh' ? chapter.chapterName : (LANGUAGE_DATA.en.chapters[chapter.chapterId] || chapter.chapterName);
-
+                const competencyHtml = results.competencyResults.map(comp => {
+                    const percentage = comp.averageMastery;
+                    const colorClass = percentage >= 80 ? 'bg-lime-500' : (percentage >= 60 ? 'bg-yellow-400' : 'bg-red-500');
+                    const textColorClass = percentage >= 80 ? 'text-lime-500' : (percentage >= 60 ? 'text-yellow-400' : 'text-red-500');
+                    const compId = comp.compName.replace(/\s/g, '-');
+                    const chapterDetailHtml = comp.detailedChapters.map(chapter => {
+                        const cp = chapter.masteryPercentage;
+                        const cc = cp >= 80 ? 'bg-lime-700' : (cp >= 60 ? 'bg-yellow-700' : 'bg-red-700');
+                        const tc = cp >= 80 ? 'text-lime-400' : (cp >= 60 ? 'text-yellow-400' : 'text-red-400');
+                        const localizedChapName = getText('chapters')[chapter.chapterId] || chapter.chapterName;
                         return `
-                            <div class="mb-4 p-2 bg-[#2a2a44] rounded-lg border border-cyan-500/10">
-                                <div class="flex justify-between items-center mb-1">
-                                    <span class="text-sm font-semibold text-gray-200">${escapeHtml(chapter.chapterId)} ${escapeHtml(chapName)}</span>
-                                    <span class="text-xs ${textColorClass}">${percentage}%</span>
-                                </div>
-                                <div class="flex items-center">
-                                    <div class="mastery-bar-outer flex-grow h-3 bg-gray-700">
-                                        <div class="mastery-bar-inner ${colorClass}" style="${widthStyle}"></div>
-                                    </div>
-                                </div>
+                            <div class="mb-3">
+                                <div class="flex justify-between items-center text-sm text-gray-400 mb-1"><span>${chapter.chapterId} ${escapeHtml(localizedChapName)}</span><span class="font-bold ${tc}">${cp}%</span></div>
+                                <div class="mastery-bar-outer h-2 bg-gray-700"><div class="mastery-bar-inner ${cc}" style="width: ${cp}%;"></div></div>
                             </div>
                         `;
                     }).join('');
-
-                    // --- 3. 構建四大能力卡片 (帶有詳細說明) ---
-                    const competencyHtml = results.competencyResults.map(comp => {
-                        const percentage = comp.averageMastery;
-                        let colorClass = 'bg-lime-500'; // 良好: 霓虹綠
-                        let textColorClass = 'text-lime-500';
-                        if (percentage < 60) {
-                            colorClass = 'bg-red-500'; // 最需補強: 霓虹紅
-                            textColorClass = 'text-red-500';
-                        } else if (percentage < 80) {
-                            colorClass = 'bg-yellow-400'; // 中度掌握: 鮮黃色
-                            textColorClass = 'text-yellow-400';
-                        }
-                        
-                        const compNameKey = comp.compName; 
-                        const compId = compNameKey.replace(/\s/g, '-'); 
-                        const widthStyle = `width: ${Math.max(0, percentage)}%;`;
-                        const compIcon = COMPETENCY_ICONS[compNameKey] || ''; 
-                        
-                        const localizedCompName = getText(compNameKey); 
-
-                        const chapterDetailHtml = comp.detailedChapters.map(chapter => {
-                            const chapPercentage = chapter.masteryPercentage;
-                            let chapColorClass = 'bg-lime-700'; // 深一點的霓虹綠
-                            let chapTextColorClass = 'text-lime-400';
-                            if (chapPercentage < 60) {
-                                chapColorClass = 'bg-red-700'; // 深一點的霓虹紅
-                                chapTextColorClass = 'text-red-400';
-                            } else if (chapPercentage < 80) {
-                                chapColorClass = 'bg-yellow-700'; // 深一點的鮮黃
-                                chapTextColorClass = 'text-yellow-400';
-                            }
-                            const chapWidthStyle = `width: ${Math.max(0, chapPercentage)}%;`;
-                            
-                            const chapName = quizState.language === 'zh' ? chapter.chapterName : (LANGUAGE_DATA.en.chapters[chapter.chapterId] || chapter.chapterName);
-
-                            return `
-                                <div class="mb-3">
-                                    <div class="flex justify-between items-center text-sm text-gray-400 mb-1">
-                                        <span>${escapeHtml(chapter.chapterId)} ${escapeHtml(chapName)}</span>
-                                        <span class="font-bold ${chapTextColorClass}">${chapPercentage}%</span>
-                                    </div>
-                                    <div class="mastery-bar-outer flex-grow h-2 bg-gray-700">
-                                        <div class="mastery-bar-inner ${chapColorClass}" style="${chapWidthStyle}"></div>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('');
-
-                        const detailGuide = CAREER_GUIDANCE_DATA[compNameKey];
-                        const rolesListHtml = quizState.language === 'zh'
-                            ? detailGuide.roles.map(role => `<li class="text-gray-300">${role}</li>`).join('')
-                            : LANGUAGE_DATA.en.career_details[compNameKey].roles.map(role => `<li class="text-gray-300">${role}</li>`).join('');
-
-                        return `
-                            <div class="mb-4 futuristic-card p-0 shadow-none border-none">
-                                <div id="header-${compId}" class="p-4 cursor-pointer accordion-header hover:bg-gray-700 rounded-lg shadow-md border-b-2 border-cyan-500/10" data-comp-name="${escapeHtml(compNameKey)}">
-                                    <div class="flex items-center mb-2">
-                                        ${compIcon}
-                                        <h3 class="text-base font-bold text-gray-200">${localizedCompName}</h3>
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <div class="mastery-bar-outer flex-grow mr-4 bg-gray-700"> 
-                                            <div class="mastery-bar-inner ${colorClass}" style="${widthStyle}"></div>
-                                        </div>
-                                        <span class="text-xl font-extrabold ${textColorClass} mr-2">${percentage}%</span>
-                                        <svg id="icon-${compId}" class="w-5 h-5 text-cyan-400 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                                    </div>
-                                </div>
-                                <div id="content-${compId}" class="accordion-content">
-                                    <div class="p-4 pt-0 mt-2 text-left text-gray-300">
-                                        <div class="mb-4 p-3 bg-[#130E20] rounded-md border border-gray-700">
-                                            <span class="block text-orange-400 font-bold text-sm mb-1">${getText('competency_roles')}：</span>
-                                            <ul class="list-disc list-inside ml-6 text-xs space-y-0.5">
-                                                ${rolesListHtml}
-                                            </ul>
-                                        </div>
-                                        <p class="text-sm font-semibold text-gray-300 mb-3">${getText('competency_details_title')}</p>
-                                        ${chapterDetailHtml}
-                                    </div>
+                    const roles = quizState.language === 'zh' ? CAREER_GUIDANCE_DATA[comp.compName].roles : LANGUAGE_DATA.en.career_details[comp.compName].roles;
+                    return `
+                        <div class="mb-4 futuristic-card p-0 shadow-none border-none">
+                            <div id="header-${compId}" class="p-4 cursor-pointer accordion-header hover:bg-gray-700 rounded-lg shadow-md border-b-2 border-cyan-500/10" data-comp-name="${comp.compName}">
+                                <div class="flex items-center mb-2"><h3 class="text-base font-bold text-gray-200">${getText(comp.compName)}</h3></div>
+                                <div class="flex items-center justify-between">
+                                    <div class="mastery-bar-outer flex-grow mr-4 bg-gray-700"><div class="mastery-bar-inner ${colorClass}" style="width: ${percentage}%;"></div></div>
+                                    <span class="text-xl font-extrabold ${textColorClass} mr-2">${percentage}%</span>
+                                    <svg id="icon-${compId}" class="w-5 h-5 text-cyan-400 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                 </div>
                             </div>
-                        `;
-                    }).join('');
-                    
-                    const masteryLegendHtml = `
-                        <div class="mb-4 text-sm text-gray-300 space-y-2">
-                            <p><span class="font-bold text-lime-400">${getText('mastery_high')}</span><br>${getText('mastery_high_desc')}</p>
-                            <p><span class="font-bold text-red-500">${getText('mastery_low')}</span><br>${getText('mastery_low_desc')}</p>
-                        </div>
-                    `;
-                    
-                    const learningAdviceHtml = `
-                        <div class="text-sm text-orange-400 mb-3 border-b border-gray-800 pb-2 flex items-start">
-                            <svg class="w-4 h-4 mr-1 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                            <div>
-                                <span class="font-bold">${getText('learning_advice_title')}</span><br>
-                                <span>${getText('learning_advice_content').replace('CH1 → CH10', `<span class='text-cyan-400 font-bold'>CH1 → CH10</span>`).replace('「TIMS行銷企劃教材與題庫」', `<span class='text-cyan-400 font-bold'>「TIMS行銷企劃教材與題庫」</span>`)}</span>
+                            <div id="content-${compId}" class="accordion-content">
+                                <div class="p-4 pt-0 mt-2 text-left text-gray-300">
+                                    <div class="mb-4 p-3 bg-[#130E20] rounded-md border border-gray-700">
+                                        <span class="block text-cyan-400 font-bold text-sm mb-1">${getText('competency_roles')}：</span>
+                                        <ul class="list-disc list-inside ml-6 text-xs space-y-0.5">${roles.map(r => `<li class="text-gray-300">${r}</li>`).join('')}</ul>
+                                    </div>
+                                    <p class="text-sm font-semibold text-gray-300 mb-3">${getText('competency_details_title')}</p>${chapterDetailHtml}
+                                </div>
                             </div>
                         </div>
                     `;
-                    
-                    const prDisplayHtml = `
-                        <div class="mt-4 pt-3 border-t border-cyan-500/30">
-                            <p class="text-xl font-extrabold text-orange-400">${results.prValue} PR</p>
-                            <p class="text-sm text-gray-500 mt-1">${getText('pr_wins')} ${results.prValue}${getText('pr_testers')}</p>
-                        </div>
-                    `;
-                    
-                    const personalizedTitle = quizState.userName ? `${escapeHtml(quizState.userName)} ${getText('score_label_prefix')}` : getText('score_label_prefix');
-                    const resultsJsonString = JSON.stringify(results);
+                }).join('');
 
-                    content.innerHTML = `
-                        <div class="futuristic-card text-center p-8">
-                            <div id="result-data" style="display: none;">${resultsJsonString}</div>
-                            <h1 class="text-xl font-bold text-orange-400 mb-6 border-b border-cyan-500/30 pb-2">${getText('result_title')}</h1>
-                            
-                            <div class="bg-[#130E20] p-6 rounded-xl mb-8 border border-cyan-500/20 shadow-neon-cyan">
-                                <p class="text-lg text-cyan-400 mb-2">${personalizedTitle}</p>
-                                <div class="flex items-center justify-center">
-                                    <p class="text-6xl font-extrabold ${scoreTextClass}">${results.totalScore}</p>
-                                </div>
-                                <p class="text-gray-500 mt-2">${getText('score_label_suffix')}</p>
-                                ${prDisplayHtml}
-                            </div>
-
-                            <div class="text-left mb-8 p-4 bg-[#1a1a2e] rounded-xl border border-cyan-500/20 shadow-neon-cyan">
-                                <h2 class="text-xl md:text-2xl font-extrabold text-cyan-400 mb-4 pb-2 title-glow flex items-center">
-                                    <svg class="w-6 h-6 mr-2 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19C7.794 19 7 18.206 7 17s.794-2 2-2 2 .794 2 2-.794 2-2 2zM21 16c1.206 0 2 .794 2 2s-.794 2-2 2-2-.794-2-2 .794-2 2-2zM9 19V6l12-3v13"/></svg>
-                                    ${getText('mastery_section_title')}
-                                </h2>
-                                ${masteryLegendHtml}
-                                ${learningAdviceHtml}
-                                ${chapterOverviewHtml}
-                            </div>
-                            
-                            <div class="text-left mb-8 p-4 bg-[#1a1a2e] rounded-xl border border-cyan-500/20 shadow-neon-cyan">
-                                <h2 class="text-xl md:text-2xl font-extrabold text-cyan-400 mb-4 pb-2 title-glow flex items-center">
-                                    <svg class="w-6 h-6 mr-2 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-                                    ${getText('career_section_title')}
-                                </h2>
-                                ${recommendedCareerHtml} 
-                                <div id="competency-list">
-                                    ${competencyHtml}
-                                </div>
-                            </div>
-
-                            <div class="flex flex-col gap-4">
-                                <button id="btn-export-pdf" class="futuristic-button bg-cyan-700 hover:bg-cyan-600 shadow-neon-cyan">
-                                    ${getText('btn_export')}
-                                </button>
-                                <button id="${RETRY_BUTTON_ID}" class="futuristic-button">
-                                    ${getText('btn_retry')}
-                                </button>
+                content.innerHTML = `
+                    <div id="result-page" class="futuristic-card text-center p-8">
+                        <div id="result-data" style="display:none">${JSON.stringify(results)}</div>
+                        <h1 class="text-xl font-bold text-orange-400 mb-6 border-b border-cyan-500/30 pb-2">${getText('result_title')}</h1>
+                        <div class="bg-[#130E20] p-6 rounded-xl mb-8 border border-cyan-500/20 shadow-neon-cyan">
+                            <p class="text-lg text-cyan-400 mb-2">${quizState.userName} ${getText('score_label_prefix')}</p>
+                            <div class="flex items-center justify-center"><p class="text-6xl font-extrabold ${scoreClass}">${results.totalScore}</p></div>
+                            <div class="mt-4 pt-3 border-t border-cyan-500/30">
+                                <p class="text-xl font-extrabold text-orange-400">${results.prValue} PR</p>
+                                <p class="text-sm text-gray-500 mt-1">${getText('pr_wins')} ${results.prValue}${getText('pr_testers')}</p>
                             </div>
                         </div>
-                    `;
-                    
-                    document.getElementById(RETRY_BUTTON_ID).addEventListener('click', renderStartScreen);
-                    document.getElementById('btn-export-pdf').addEventListener('click', () => exportResultsToPDF(results));
-                    
-                    const competencyList = document.getElementById('competency-list');
-                    competencyList.addEventListener('click', (e) => {
-                        const header = e.target.closest('[id^="header-"]');
-                        if (header) {
-                            const compName = header.getAttribute('data-comp-name');
-                            toggleAccordion(compName);
-                        }
-                    });
-
-                } catch (e) {
-                    displayError("計算結果錯誤", e.message);
-                }
+                        <div class="text-left mb-8 p-4 bg-[#1a1a2e] rounded-xl border border-cyan-500/20 shadow-neon-cyan">
+                            <h2 class="text-xl font-extrabold text-cyan-400 mb-4 title-glow">${getText('mastery_section_title')}</h2>
+                            <div class="mb-4 text-sm text-gray-300 space-y-2"><p><span class="font-bold text-lime-400">${getText('mastery_high')}</span><br>${getText('mastery_high_desc')}</p><p><span class="font-bold text-red-500">${getText('mastery_low')}</span><br>${getText('mastery_low_desc')}</p></div>
+                            <div class="text-sm text-orange-400 mb-3 border-b border-gray-800 pb-2 flex items-start"><div><span class="font-bold">${getText('learning_advice_title')}</span><br><span>${getText('learning_advice_content')}</span></div></div>
+                            ${masteryListHtml}
+                        </div>
+                        <div class="text-left mb-8 p-4 bg-[#1a1a2e] rounded-xl border border-cyan-500/20 shadow-neon-cyan">
+                            <h2 class="text-xl font-extrabold text-cyan-400 mb-4 title-glow">${getText('career_section_title')}</h2>
+                            <div id="competency-list">${competencyHtml}</div>
+                        </div>
+                        <button id="${RETRY_BUTTON_ID}" class="futuristic-button">${getText('btn_retry')}</button>
+                    </div>
+                `;
+                document.getElementById(RETRY_BUTTON_ID).addEventListener('click', renderStartScreen);
+                const list = document.getElementById('competency-list');
+                list.onclick = (e) => {
+                    const h = e.target.closest('.accordion-header');
+                    if(h) toggleAccordion(h.getAttribute('data-comp-name'));
+                };
+                setTimeout(showSaveReminderModal, 500);
             }
 
-            /**
-             * 應用程式啟動與事件監聽設定
-             */
             function initApp() {
                 try {
                     const content = document.getElementById(CONTENT_ID);
-                    if (!content) throw new Error("Content container not found.");
-                    
                     content.addEventListener('click', (event) => {
-                        if (event.target.closest('.futuristic-option')) {
-                            handleOptionClick(event);
-                        }
+                        if (event.target.closest('.futuristic-option')) handleOptionClick(event);
                     });
-
                     renderStartScreen();
-                } catch (e) {
-                    displayError("應用程式啟動錯誤", e.message);
-                }
+                } catch (e) { displayError("應用程式啟動錯誤", e.message); }
             }
-
             document.addEventListener('DOMContentLoaded', initApp);
         })();
-
     </script>
 </body>
 </html>
